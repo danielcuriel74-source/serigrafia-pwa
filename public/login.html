@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1f6a5a" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+  <title>Login | SerigrafiaApp</title>
+  <style>
+    :root {
+      --bg: #f6f3ee;
+      --panel: #fffdf9;
+      --text: #1f1c19;
+      --muted: #6a5f55;
+      --accent: #c5542f;
+      --accent-2: #1f6a5a;
+      --border: #e2d6c8;
+      --danger: #a52a2a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background:
+        radial-gradient(circle at 20% 20%, #edd6bf 0%, transparent 45%),
+        radial-gradient(circle at 80% 0%, #d9efe9 0%, transparent 38%),
+        var(--bg);
+      display: grid;
+      place-items: center;
+      color: var(--text);
+      padding: 20px;
+    }
+
+    .card {
+      width: min(420px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 1.65rem;
+    }
+
+    .sub {
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 12px;
+      margin-bottom: 14px;
+      font-size: 0.98rem;
+      background: white;
+    }
+
+    button {
+      width: 100%;
+      border: 0;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 0.98rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: white;
+      background: linear-gradient(120deg, var(--accent), var(--accent-2));
+    }
+
+    .btn-test {
+      margin-top: 10px;
+      background: #2f4f4f;
+    }
+
+    .quick-grid {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .btn-admin {
+      background: #1f6a5a;
+    }
+
+    .btn-editor {
+      background: #2f4f8a;
+    }
+
+    .btn-op {
+      background: #5d6472;
+    }
+
+    .msg {
+      margin-top: 14px;
+      min-height: 22px;
+      font-size: 0.9rem;
+    }
+
+    .ok {
+      color: var(--accent-2);
+    }
+
+    .err {
+      color: var(--danger);
+    }
+
+    .hint {
+      margin-top: 14px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    code {
+      background: #f1e5d8;
+      border-radius: 6px;
+      padding: 2px 6px;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>SerigrafiaApp</h1>
+    <p class="sub">Inicia sesion para entrar al panel de serigrafia.</p>
+
+    <form id="loginForm">
+      <label for="email">Correo</label>
+      <input id="email" type="email" required placeholder="admin@serigrafia.local" />
+
+      <label for="password">Contrasena</label>
+      <input id="password" type="password" required placeholder="********" />
+
+      <button type="submit">Entrar</button>
+      <div class="quick-grid">
+        <button id="quickLoginAdminBtn" class="btn-test btn-admin" type="button">Entrar como Administrador</button>
+        <button id="quickLoginEditorBtn" class="btn-test btn-editor" type="button">Entrar como Editor</button>
+        <button id="quickLoginOpBtn" class="btn-test btn-op" type="button">Entrar como OP (solo lectura)</button>
+      </div>
+    </form>
+
+    <div id="msg" class="msg"></div>
+
+    <p class="hint">
+      Admin: <code>admin@serigrafia.local</code> / <code>admin123</code><br />
+      Editor: <code>editor@serigrafia.local</code> / <code>editor123</code><br />
+      OP: <code>op@serigrafia.local</code> / <code>op123</code>
+    </p>
+  </main>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const msg = document.getElementById('msg');
+    const quickLoginAdminBtn = document.getElementById('quickLoginAdminBtn');
+    const quickLoginEditorBtn = document.getElementById('quickLoginEditorBtn');
+    const quickLoginOpBtn = document.getElementById('quickLoginOpBtn');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      msg.className = 'msg';
+      msg.textContent = 'Validando...';
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const response = await fetch('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          msg.classList.add('err');
+          msg.textContent = data.error || 'No se pudo iniciar sesion';
+          return;
+        }
+
+        localStorage.setItem('serigrafia_user', JSON.stringify(data.user));
+        msg.classList.add('ok');
+        msg.textContent = 'Bienvenido ' + data.user.nombre + '. Redirigiendo...';
+        setTimeout(() => {
+          window.location.href = '/panel.html';
+        }, 500);
+      } catch (_error) {
+        msg.classList.add('err');
+        msg.textContent = 'Error de red. Intenta de nuevo.';
+      }
+    });
+
+    function quickLogin(userPrueba, label) {
+      localStorage.setItem('serigrafia_user', JSON.stringify(userPrueba));
+      msg.className = 'msg ok';
+      msg.textContent = `Acceso rapido como ${label}. Redirigiendo...`;
+
+      setTimeout(() => {
+        window.location.href = '/panel.html';
+      }, 300);
+    }
+
+    quickLoginAdminBtn.addEventListener('click', () => {
+      quickLogin(
+        {
+          id: 'u_admin',
+          nombre: 'Administrador',
+          email: 'admin@serigrafia.local',
+          roles: ['admin']
+        },
+        'Administrador'
+      );
+    });
+
+    quickLoginEditorBtn.addEventListener('click', () => {
+      quickLogin(
+        {
+          id: 'u_editor',
+          nombre: 'Editor',
+          email: 'editor@serigrafia.local',
+          roles: ['editor']
+        },
+        'Editor'
+      );
+    });
+
+    quickLoginOpBtn.addEventListener('click', () => {
+      quickLogin(
+        {
+          id: 'u_op',
+          nombre: 'Operador Lectura',
+          email: 'op@serigrafia.local',
+          roles: ['op']
+        },
+        'OP (solo lectura)'
+      );
+    });
+  </script>
+  <script src="/pwa-register.js"></script>
+</body>
+</html>

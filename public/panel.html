@@ -1,0 +1,1875 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1f6a5a" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+  <title>Produccion | SerigrafiaApp</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      --bg: #eef1f5;
+      --card: #ffffff;
+      --card-soft: #f8fafc;
+      --text: #172033;
+      --muted: #6d7586;
+      --accent: #1c7ed6;
+      --accent-2: #0f4c81;
+      --line: #dbe2ea;
+      --ok: #1e9b6e;
+      --warn: #d97a1a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Manrope", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 0% 0%, #d7e9ff 0%, transparent 35%),
+        radial-gradient(circle at 100% 0%, #e3f9f3 0%, transparent 30%),
+        var(--bg);
+      color: var(--text);
+      padding: 18px;
+    }
+
+    .app {
+      width: min(1220px, 100%);
+      margin: 0 auto;
+      display: grid;
+      gap: 14px;
+    }
+
+    .topbar {
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(219, 226, 234, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 10px;
+      display: grid;
+      grid-template-columns: auto minmax(200px, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      box-shadow: 0 10px 30px rgba(16, 41, 69, 0.08);
+    }
+
+    .logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 10px;
+      border: 1px solid #d5e1ef;
+      background: white;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(14, 35, 58, 0.12);
+    }
+
+    .logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .logo-fallback {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 800;
+      font-size: 0.9rem;
+      background: linear-gradient(140deg, var(--accent), var(--accent-2));
+      letter-spacing: 0.04em;
+    }
+
+    .search {
+      position: relative;
+      display: grid;
+      grid-template-columns: 20px 1fr;
+      gap: 8px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: var(--card);
+    }
+
+    .search input {
+      border: 0;
+      outline: none;
+      width: 100%;
+      color: var(--text);
+      font-size: 0.95rem;
+      background: transparent;
+      font-family: inherit;
+    }
+
+    .search-results {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      list-style: none;
+      margin: 0;
+      padding: 6px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #ffffff;
+      box-shadow: 0 8px 22px rgba(19, 39, 66, 0.14);
+      max-height: 240px;
+      overflow: auto;
+      z-index: 20;
+    }
+
+    .search-results[hidden] {
+      display: none;
+    }
+
+    .search-results li {
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: #1f2a3d;
+    }
+
+    .search-results li + li {
+      margin-top: 4px;
+    }
+
+    .search-results li:hover {
+      background: #eef5ff;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 9px 12px;
+      background: var(--card);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 14px 30px rgba(20, 35, 60, 0.07);
+    }
+
+    .main {
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .section {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      background: var(--card-soft);
+    }
+
+    .title {
+      margin: 0 0 10px;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .field {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      color: var(--text);
+      background: white;
+      font-family: inherit;
+    }
+
+    .name-row {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr 220px;
+      align-items: center;
+    }
+
+    .seq-version {
+      font-size: 0.9rem;
+    }
+
+    .dropzone {
+      border: 2px dashed #bfd2e7;
+      border-radius: 14px;
+      min-height: 180px;
+      background: #f4f8fd;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      text-align: center;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .dropzone:hover {
+      border-color: var(--accent);
+      background: #eef5ff;
+    }
+
+    .dropzone img {
+      max-width: 100%;
+      max-height: 250px;
+      object-fit: contain;
+      border-radius: 10px;
+      border: 1px solid #d5e1ef;
+      background: white;
+    }
+
+    .dropzone input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      background: white;
+    }
+
+    thead {
+      background: #f0f4f9;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 10px;
+      font-size: 0.86rem;
+      border-bottom: 1px solid #ecf0f5;
+    }
+
+    td input,
+    td select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px;
+      font-family: inherit;
+      background: white;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: linear-gradient(120deg, var(--accent), var(--accent-2));
+    }
+
+    .btn-soft {
+      background: #6d7586;
+    }
+
+    .btn-secondary {
+      background: #1f6a5a;
+    }
+
+    .btn-outline {
+      background: #2f4f8a;
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .btn-danger {
+      background: #d94343;
+    }
+
+    .side {
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .side h2 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .meta {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      border: 1px solid #cfe8db;
+      color: #17724f;
+      background: #ebfbf4;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 6px 10px;
+    }
+
+    .status {
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .status-ok {
+      background: #ebf9f2;
+      border: 1px solid #c7ecdd;
+      color: var(--ok);
+    }
+
+    .status-warn {
+      background: #fff5e7;
+      border: 1px solid #f5dfba;
+      color: var(--warn);
+    }
+
+    .links {
+      display: grid;
+      gap: 8px;
+    }
+
+    .link {
+      text-decoration: none;
+      color: var(--accent-2);
+      font-weight: 700;
+      background: #eff6ff;
+      border: 1px solid #d4e6fd;
+      border-radius: 10px;
+      padding: 9px 10px;
+    }
+
+    .small {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .color-preview {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      background-color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .color-preview.is-empty {
+      background-image: linear-gradient(135deg, transparent 44%, #111 44%, #111 56%, transparent 56%);
+    }
+
+    .color-preview.is-heat {
+      background-color: #ff8f1f !important;
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    }
+
+    .preview-cell {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .color-manual {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .squeegee-wrap {
+      border-radius: 6px;
+      overflow: hidden;
+      display: block;
+      border: 1px solid #ccc;
+    }
+    .squeegee-wrap select.squeegee {
+      background: transparent !important;
+      width: 100%;
+      border: none;
+      font-weight: 600;
+      padding: 4px 6px;
+      cursor: pointer;
+    }
+
+    .malla-input {
+      width: 80px;
+      padding: 4px 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.95em;
+    }
+
+    .row-order {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .drag-handle {
+      border: 1px solid #c9d2de;
+      border-radius: 6px;
+      background: #f7f9fc;
+      color: #4c5870;
+      width: 24px;
+      height: 24px;
+      display: inline-grid;
+      place-items: center;
+      cursor: grab;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    tr.dragging {
+      opacity: 0.6;
+    }
+
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+      color: #6d7586;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .name-row {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        grid-template-columns: 1fr;
+      }
+
+      .top-actions {
+        justify-content: flex-end;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="logo" title="SerigrafiApp">
+        <img id="appLogo" src="/logo-serigrafiapp.jpg" alt="Logo SerigrafiApp" />
+        <div id="logoFallback" class="logo-fallback">SG</div>
+      </div>
+      <label class="search" for="buscarDiseno">
+        <span>🔎</span>
+        <input id="buscarDiseno" type="text" placeholder="Buscar diseno..." />
+        <ul id="searchResults" class="search-results" hidden></ul>
+      </label>
+      <div class="top-actions">
+        <span class="chip" id="versionChip">v1</span>
+        <button id="logoutBtn" class="icon-btn" type="button" title="Cerrar sesion">⎋</button>
+      </div>
+    </header>
+
+    <section class="layout">
+      <div class="card main">
+        <section class="section">
+          <p class="title">Nombre del diseno</p>
+          <div class="name-row">
+            <input id="nombreDiseno" class="field" type="text" placeholder="Ej: Camiseta Festival 2026" />
+            <select id="versionSelect" class="field seq-version" disabled>
+              <option value="">Version actual</option>
+            </select>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="title">Imagen del diseno</p>
+          <label class="dropzone" for="imagenDiseno">
+            <input id="imagenDiseno" type="file" accept="image/*" />
+            <div id="dropHint">
+              <div style="font-size: 2rem; margin-bottom: 6px;">🖼️</div>
+              <div>Toca para agregar imagen del diseno</div>
+            </div>
+            <img id="previewImagen" alt="Preview del diseno" hidden />
+          </label>
+        </section>
+
+        <section class="section">
+          <p class="title">Ubicacion de la impresion</p>
+          <div class="grid-2">
+            <select id="ubicacion" class="field">
+              <option value="">Seleccionar ubicacion...</option>
+              <option value="frente">Frente</option>
+              <option value="espalda">Espalda</option>
+              <option value="manga_izq">Manga izquierda</option>
+              <option value="manga_der">Manga derecha</option>
+              <option value="cuello">Cuello</option>
+            </select>
+            <input id="comentarioRapido" class="field" type="text" placeholder="Referencia interna" />
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="title">Secuencia de impresion</p>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Pantone</th>
+                <th style="width: 50px;">Preview</th>
+                <th>Squeegee</th>
+                <th>Malla</th>
+                <th>Pelicula</th>
+                <th>Accion</th>
+              </tr>
+            </thead>
+            <tbody id="secuenciaBody"></tbody>
+          </table>
+        </section>
+
+        <section class="section">
+          <p class="title">Comentarios</p>
+          <textarea id="comentarios" class="field" rows="4" placeholder="Escribe observaciones para produccion"></textarea>
+        </section>
+
+        <div class="btn-row">
+          <button id="guardarBtn" type="button" class="btn btn-primary">Guardar diseno</button>
+          <button id="guardarSeriBtn" type="button" class="btn btn-secondary">Guardar .seri</button>
+          <button id="abrirSeriBtn" type="button" class="btn btn-outline">Abrir .seri</button>
+          <button id="compartirSeriBtn" type="button" class="btn btn-secondary">Compartir .seri</button>
+          <button id="compartirPdfBtn" type="button" class="btn btn-outline">Compartir PDF</button>
+          <button id="limpiarBtn" type="button" class="btn btn-soft">Limpiar formulario</button>
+        </div>
+        <input id="seriFileInput" type="file" accept=".seri,application/json" hidden />
+      </div>
+
+      <aside class="card side">
+        <h2>Sesion activa</h2>
+        <p id="bienvenida" class="meta"></p>
+        <span class="badge">Produccion lista</span>
+
+        <div id="estado" class="status status-warn">
+          Pendiente: completa los datos del diseno.
+        </div>
+
+        <div class="links">
+          <a class="link" href="/users" target="_blank" rel="noreferrer">Ver usuarios (JSON)</a>
+          <a class="link" href="/roles" target="_blank" rel="noreferrer">Ver roles (JSON)</a>
+          <a class="link" href="/orden-produccion.html" target="_blank" rel="noreferrer">Abrir formato de produccion</a>
+        </div>
+
+        <p class="small">Tip: los datos se guardan en el navegador mientras trabajas.</p>
+      </aside>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="/pwa-register.js"></script>
+  <script>
+    const draftKey = 'serigrafia_diseno_draft';
+    const versionsKey = 'serigrafia_sequence_versions';
+    const seriFilesKey = 'serigrafia_seri_files';
+    const raw = localStorage.getItem('serigrafia_user');
+
+    if (!raw) {
+      window.location.href = '/login';
+    }
+
+    const user = JSON.parse(raw);
+    const nombreDisenoInput = document.getElementById('nombreDiseno');
+    const versionSelect = document.getElementById('versionSelect');
+    const ubicacionInput = document.getElementById('ubicacion');
+    const comentarioRapidoInput = document.getElementById('comentarioRapido');
+    const comentariosInput = document.getElementById('comentarios');
+    const secuenciaBody = document.getElementById('secuenciaBody');
+    const estadoEl = document.getElementById('estado');
+    const previewImagen = document.getElementById('previewImagen');
+    const dropHint = document.getElementById('dropHint');
+    const imagenInput = document.getElementById('imagenDiseno');
+    const appLogo = document.getElementById('appLogo');
+    const logoFallback = document.getElementById('logoFallback');
+    const buscarDisenoInput = document.getElementById('buscarDiseno');
+    const searchResultsEl = document.getElementById('searchResults');
+    const versionChip = document.getElementById('versionChip');
+    const guardarBtn = document.getElementById('guardarBtn');
+    const guardarSeriBtn = document.getElementById('guardarSeriBtn');
+    const abrirSeriBtn = document.getElementById('abrirSeriBtn');
+    const compartirSeriBtn = document.getElementById('compartirSeriBtn');
+    const compartirPdfBtn = document.getElementById('compartirPdfBtn');
+    const limpiarBtn = document.getElementById('limpiarBtn');
+    const seriFileInput = document.getElementById('seriFileInput');
+
+    let pantoneMap = {};
+    let activeVersionId = '';
+    let draggedRow = null;
+    let currentSeriFileName = '';
+    let currentSeriLibraryId = '';
+    let currentSeriHandle = null;
+
+    const isAdmin = Array.isArray(user.roles) && user.roles.includes('admin');
+    const isEditor = Array.isArray(user.roles) && user.roles.includes('editor');
+    const canEdit = isAdmin || isEditor;
+
+    // Cargar el mapa Pantone desde JSON
+    fetch('/pantone-map.json')
+      .then(response => response.json())
+      .then(data => {
+        pantoneMap = data;
+      })
+      .catch(() => {
+        pantoneMap = {};
+      });
+
+    document.getElementById('bienvenida').textContent = `Operador: ${user.nombre} (${user.email}) | Roles: ${user.roles.join(', ')}`;
+
+    appLogo.addEventListener('load', () => {
+      logoFallback.style.display = 'none';
+    });
+
+    appLogo.addEventListener('error', () => {
+      logoFallback.style.display = 'grid';
+    });
+
+    buscarDisenoInput.addEventListener('input', () => {
+      renderSearchResults(buscarDisenoInput.value);
+    });
+
+    buscarDisenoInput.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter') {
+        return;
+      }
+
+      event.preventDefault();
+      const matched = renderSearchResults(buscarDisenoInput.value);
+      if (matched.length > 0) {
+        openSeriLibraryItem(matched[0]);
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('.search')) {
+        hideSearchResults();
+      }
+    });
+
+    function getPantoneHex(pantoneCode) {
+      if (!pantoneCode) return '#ffffff';
+      const normalized = pantoneCode
+        .trim()
+        .toLowerCase()
+        .replace(/^pantone\s*/, '')
+        .replace(/_/g, '-');
+
+      const compact = normalized.replace(/[\s-]+/g, '');
+      const hyphenated = normalized.replace(/\s+/g, '-');
+
+      if (compact.startsWith('#')) {
+        return normalized;
+      }
+
+      const whiteAliases = new Set(['basewhite', 'white', 'blanco', 'wht', 'bw', 'bco']);
+      if (whiteAliases.has(compact)) {
+        return '#ffffff';
+      }
+
+      const blackAliases = new Set(['black', 'negro', 'blk', 'bk']);
+      if (blackAliases.has(compact)) {
+        return '#000000';
+      }
+
+      const candidates = new Set();
+      candidates.add(normalized);
+      candidates.add(hyphenated);
+      candidates.add(compact);
+      if (!hyphenated.endsWith('-c')) {
+        candidates.add(`${hyphenated}-c`);
+      }
+
+      // Atajos comunes: cg1 / c g 1 / cool gray 1
+      const coolGrayMatch = compact.match(/^(?:cg|coolgray)(\d+)$/);
+      if (coolGrayMatch) {
+        candidates.add(`cool-gray-${coolGrayMatch[1]}-c`);
+      }
+
+      // Atajos comunes: wg1 / warm gray 1
+      const warmGrayMatch = compact.match(/^(?:wg|warmgray)(\d+)$/);
+      if (warmGrayMatch) {
+        candidates.add(`warm-gray-${warmGrayMatch[1]}-c`);
+      }
+
+      // rhodamine / rhodamine red / rhodaminered -> rhodamine-red-c
+      if (/^rhodamine(red)?$/.test(compact)) {
+        candidates.add('rhodamine-red-c');
+      }
+
+      for (const key of candidates) {
+        if (pantoneMap[key]) {
+          return pantoneMap[key];
+        }
+      }
+
+      // Ej: 148c -> 148-c
+      if (/^\d+[a-z]$/.test(compact)) {
+        const withHyphen = compact.replace(/^(\d+)([a-z])$/, '$1-$2');
+        if (pantoneMap[withHyphen]) {
+          return pantoneMap[withHyphen];
+        }
+      }
+
+      // Ej: 148 -> 148-c (fallback por defecto)
+      if (/^\d+$/.test(compact)) {
+        const coated = `${compact}-c`;
+        if (pantoneMap[coated]) {
+          return pantoneMap[coated];
+        }
+      }
+
+      return '#ffffff';
+    }
+
+    const SQUEEGEE_BG = {
+      amarillo:      '#FFD600',
+      amarillo_raya: 'linear-gradient(to bottom, #FFD600 0%, #FFD600 38%, #ffffff 38%, #ffffff 62%, #FFD600 62%, #FFD600 100%)',
+      azul:          '#1565C0',
+      azul_raya:     'linear-gradient(to bottom, #1565C0 0%, #1565C0 38%, #ffffff 38%, #ffffff 62%, #1565C0 62%, #1565C0 100%)',
+      rojo:          '#C62828',
+      rojo_raya:     'linear-gradient(to bottom, #C62828 0%, #C62828 38%, #ffffff 38%, #ffffff 62%, #C62828 62%, #C62828 100%)',
+      verde:         '#2E7D32',
+      verde_raya:    'linear-gradient(to bottom, #2E7D32 0%, #2E7D32 38%, #ffffff 38%, #ffffff 62%, #2E7D32 62%, #2E7D32 100%)',
+    };
+
+    function getSqueegeeBackground(val) {
+      return SQUEEGEE_BG[val] || 'transparent';
+    }
+
+    function normalizeHexForPicker(value) {
+      const hex = String(value || '').trim();
+      if (/^#[0-9a-f]{6}$/i.test(hex)) {
+        return hex;
+      }
+      if (/^#[0-9a-f]{3}$/i.test(hex)) {
+        return `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`;
+      }
+      return '#ffffff';
+    }
+
+    function getCurrentUserLabel() {
+      return user.nombre || user.email || 'Usuario';
+    }
+
+    function normalizeDesignName(name) {
+      return String(name || '').trim().toLowerCase();
+    }
+
+    function loadVersionsMap() {
+      const rawVersions = localStorage.getItem(versionsKey);
+      if (!rawVersions) {
+        return {};
+      }
+      try {
+        return JSON.parse(rawVersions);
+      } catch (_error) {
+        return {};
+      }
+    }
+
+    function saveVersionsMap(map) {
+      try {
+        localStorage.setItem(versionsKey, JSON.stringify(map));
+      } catch (_error) {
+        estadoEl.className = 'status status-warn';
+        estadoEl.textContent = 'No se pudo guardar la version (almacenamiento lleno).';
+      }
+    }
+
+    function getSeriLibrary() {
+      try {
+        const rawLib = localStorage.getItem(seriFilesKey);
+        const list = rawLib ? JSON.parse(rawLib) : [];
+        return Array.isArray(list) ? list : [];
+      } catch (_error) {
+        return [];
+      }
+    }
+
+    function hideSearchResults() {
+      searchResultsEl.hidden = true;
+      searchResultsEl.innerHTML = '';
+    }
+
+    function openSeriLibraryItem(item) {
+      if (!item || !item.data) {
+        return;
+      }
+
+      currentSeriLibraryId = item.id || '';
+      currentSeriFileName = item.fileName || item.data?.seriMeta?.fileName || '';
+      currentSeriHandle = null;
+      applyDesignFromPayload(item.data);
+      hideSearchResults();
+      estadoEl.className = 'status status-ok';
+      estadoEl.textContent = `Archivo ${currentSeriFileName || 'seri'} cargado desde memoria local.`;
+    }
+
+    function renderSearchResults(query) {
+      const needle = String(query || '').trim().toLowerCase();
+      const library = getSeriLibrary();
+
+      if (!needle) {
+        hideSearchResults();
+        return [];
+      }
+
+      const matched = library.filter((item) => {
+        const name = String(item?.data?.diseno?.nombreDiseno || '').toLowerCase();
+        const fileName = String(item?.fileName || '').toLowerCase();
+        const by = String(item?.savedBy || '').toLowerCase();
+        const comment = String(item?.data?.diseno?.comentarioRapido || '').toLowerCase();
+        return name.includes(needle) || fileName.includes(needle) || by.includes(needle) || comment.includes(needle);
+      }).slice(0, 8);
+
+      searchResultsEl.innerHTML = '';
+      matched.forEach((item) => {
+        const li = document.createElement('li');
+        const name = item?.data?.diseno?.nombreDiseno || '(sin nombre)';
+        const fileName = item?.fileName || 'archivo.seri';
+        li.textContent = `${name} - ${fileName}`;
+        li.addEventListener('click', () => openSeriLibraryItem(item));
+        searchResultsEl.appendChild(li);
+      });
+
+      if (matched.length === 0) {
+        const empty = document.createElement('li');
+        empty.textContent = 'Sin resultados en memoria local';
+        empty.style.cursor = 'default';
+        searchResultsEl.appendChild(empty);
+      }
+
+      searchResultsEl.hidden = false;
+      return matched;
+    }
+
+    function getVersionsForCurrentName() {
+      const key = normalizeDesignName(nombreDisenoInput.value);
+      if (!key) {
+        return [];
+      }
+      const map = loadVersionsMap();
+      const versions = map[key] || [];
+      return Array.isArray(versions) ? versions : [];
+    }
+
+    function renderVersionOptions() {
+      const versions = getVersionsForCurrentName();
+      versionSelect.innerHTML = '<option value="">Version actual</option>';
+      versions.forEach((version) => {
+        const option = document.createElement('option');
+        option.value = version.id;
+        option.textContent = `${version.id} - ${version.modifiedBy}`;
+        versionSelect.appendChild(option);
+      });
+      versionSelect.disabled = versions.length === 0;
+
+      if (activeVersionId && versions.some((v) => v.id === activeVersionId)) {
+        versionSelect.value = activeVersionId;
+      } else {
+        versionSelect.value = '';
+      }
+    }
+
+    function setVersionChip(versionLabel) {
+      versionChip.textContent = versionLabel || 'v1';
+    }
+
+    function isHeatKeyword(value) {
+      const compact = String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/^pantone\s*/, '')
+        .replace(/[\s_-]+/g, '');
+      return /^(flash|fl|presecado|secado|ht)$/.test(compact);
+    }
+
+    function getPreviewState(value) {
+      const raw = String(value || '').trim();
+      if (!raw) {
+        return { hex: '#ffffff', mode: 'empty' };
+      }
+
+      if (isHeatKeyword(raw)) {
+        return { hex: '#ff8f1f', mode: 'heat' };
+      }
+
+      return { hex: getPantoneHex(raw), mode: 'color' };
+    }
+
+    function applyPreviewState(previewEl, manualInput, value) {
+      if (!previewEl) {
+        return;
+      }
+
+      const state = getPreviewState(value);
+      previewEl.classList.remove('is-empty', 'is-heat');
+      previewEl.textContent = '';
+      previewEl.style.backgroundColor = state.hex;
+
+      if (state.mode === 'empty') {
+        previewEl.classList.add('is-empty');
+      } else if (state.mode === 'heat') {
+        previewEl.classList.add('is-heat');
+        previewEl.textContent = '🔥';
+      }
+
+      if (manualInput) {
+        manualInput.value = normalizeHexForPicker(state.hex);
+      }
+    }
+
+    function rowTemplate(index, data = {}) {
+      const colorValue = data.color || '';
+      const previewState = getPreviewState(colorValue);
+      const pickerHex = normalizeHexForPicker(previewState.hex);
+      const previewClass = previewState.mode === 'empty'
+        ? 'color-preview is-empty'
+        : previewState.mode === 'heat'
+          ? 'color-preview is-heat'
+          : 'color-preview';
+      const previewIcon = previewState.mode === 'heat' ? '🔥' : '';
+      return `
+        <tr draggable="${canEdit ? 'true' : 'false'}">
+          <td>
+            <div class="row-order">
+              <button type="button" class="drag-handle" title="Arrastrar para cambiar secuencia" ${!canEdit ? 'disabled' : ''}>☰</button>
+              <span class="row-index">${index}</span>
+            </div>
+          </td>
+          <td><input class="color" value="${colorValue}" placeholder="Ej: Pantone 123c" ${!canEdit ? 'disabled' : ''} /></td>
+          <td>
+            <div class="preview-cell">
+              <div class="${previewClass}" style="background-color: ${previewState.hex};" title="Click para ajustar color manualmente">${previewIcon}</div>
+              <input type="color" class="color-manual" value="${pickerHex}" ${!canEdit ? 'disabled' : ''} />
+            </div>
+          </td>
+          <td>
+            <div class="squeegee-wrap" style="background: ${getSqueegeeBackground(data.squeegee || '')}">
+              <select class="squeegee" ${!canEdit ? 'disabled' : ''}>
+                <option value="" ${!data.squeegee ? 'selected' : ''}>-</option>
+                <option value="amarillo" ${data.squeegee === 'amarillo' ? 'selected' : ''}>Amarillo</option>
+                <option value="amarillo_raya" ${data.squeegee === 'amarillo_raya' ? 'selected' : ''}>Amarillo con raya</option>
+                <option value="azul" ${data.squeegee === 'azul' ? 'selected' : ''}>Azul</option>
+                <option value="azul_raya" ${data.squeegee === 'azul_raya' ? 'selected' : ''}>Azul con raya</option>
+                <option value="rojo" ${data.squeegee === 'rojo' ? 'selected' : ''}>Rojo</option>
+                <option value="rojo_raya" ${data.squeegee === 'rojo_raya' ? 'selected' : ''}>Rojo con raya</option>
+                <option value="verde" ${data.squeegee === 'verde' ? 'selected' : ''}>Verde</option>
+                <option value="verde_raya" ${data.squeegee === 'verde_raya' ? 'selected' : ''}>Verde con raya</option>
+              </select>
+            </div>
+          </td>
+          <td>
+            <input type="number" class="malla malla-input" min="1" placeholder="Ej: 120" value="${data.malla || ''}" ${!canEdit ? 'disabled' : ''} />
+          </td>
+          <td>
+            <select class="pelicula" ${!canEdit ? 'disabled' : ''}>
+              <option value="" ${!data.pelicula ? 'selected' : ''}>-</option>
+              <option value="si" ${data.pelicula === 'si' ? 'selected' : ''}>Si</option>
+              <option value="no" ${data.pelicula === 'no' ? 'selected' : ''}>No</option>
+            </select>
+          </td>
+          <td><button type="button" class="btn btn-danger quitar" ${!canEdit ? 'disabled' : ''}>X</button></td>
+        </tr>
+      `;
+    }
+
+    function refreshIndexes() {
+      [...secuenciaBody.querySelectorAll('tr')].forEach((row, i) => {
+        const indexEl = row.querySelector('.row-index');
+        if (indexEl) {
+          indexEl.textContent = String(i + 1);
+        }
+      });
+    }
+
+    function addRow(data = {}) {
+      secuenciaBody.insertAdjacentHTML('beforeend', rowTemplate(secuenciaBody.children.length + 1, data));
+    }
+
+    function rowHasData(row) {
+      const color = row.querySelector('.color').value.trim();
+      const squeegee = row.querySelector('.squeegee').value;
+      const malla = row.querySelector('.malla').value;
+      const pelicula = row.querySelector('.pelicula').value;
+      return color !== '' || squeegee !== '' || malla !== '' || pelicula !== '';
+    }
+
+    function ensureTrailingEmptyRow() {
+      const rows = [...secuenciaBody.querySelectorAll('tr')];
+      if (rows.length === 0) {
+        addRow();
+        return;
+      }
+
+      const lastRow = rows[rows.length - 1];
+      if (rowHasData(lastRow)) {
+        addRow();
+      }
+    }
+
+    function serializeRows() {
+      return [...secuenciaBody.querySelectorAll('tr')].map((row) => ({
+        color: row.querySelector('.color').value,
+        squeegee: row.querySelector('.squeegee').value,
+        malla: row.querySelector('.malla').value,
+        pelicula: row.querySelector('.pelicula').value
+      }));
+    }
+
+    function getSequenceWithoutTrailingEmpty() {
+      const rows = serializeRows();
+      while (rows.length > 0) {
+        const last = rows[rows.length - 1];
+        const isEmpty = !String(last.color || '').trim()
+          && !String(last.squeegee || '').trim()
+          && !String(last.malla || '').trim()
+          && !String(last.pelicula || '').trim();
+        if (!isEmpty) {
+          break;
+        }
+        rows.pop();
+      }
+      return rows;
+    }
+
+    function buildSeriPayload() {
+      const resolvedFileName = currentSeriFileName || `${safeFileName(nombreDisenoInput.value)}.seri`;
+      return {
+        format: 'seri-v1',
+        app: 'SerigrafiApp',
+        savedAt: new Date().toISOString(),
+        seriMeta: {
+          fileName: resolvedFileName,
+          libraryId: currentSeriLibraryId || ''
+        },
+        savedBy: {
+          id: user.id,
+          nombre: user.nombre,
+          email: user.email,
+          roles: user.roles
+        },
+        diseno: {
+          nombreDiseno: nombreDisenoInput.value,
+          ubicacion: ubicacionInput.value,
+          comentarioRapido: comentarioRapidoInput.value,
+          comentarios: comentariosInput.value,
+          secuencia: getSequenceWithoutTrailingEmpty(),
+          imageData: previewImagen.hidden ? '' : previewImagen.src
+        }
+      };
+    }
+
+    function safeFileName(value) {
+      const base = String(value || '').trim() || 'diseno-serigrafia';
+      return base.toLowerCase().replace(/[^a-z0-9-_]+/g, '-').replace(/^-+|-+$/g, '');
+    }
+
+    function downloadBlob(blob, fileName) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function saveSeriToLocalLibrary(payload) {
+      try {
+        const rawLib = localStorage.getItem(seriFilesKey);
+        const lib = rawLib ? JSON.parse(rawLib) : [];
+        const nextLib = Array.isArray(lib) ? lib : [];
+
+        const payloadFileName = payload?.seriMeta?.fileName || `${safeFileName(payload.diseno?.nombreDiseno || 'diseno')}.seri`;
+        const overwriteIndex = nextLib.findIndex((item) => item.id === currentSeriLibraryId || item.fileName === payloadFileName);
+        const persisted = {
+          id: overwriteIndex >= 0 ? nextLib[overwriteIndex].id : `${safeFileName(payload.diseno?.nombreDiseno || 'diseno')}-${Date.now()}`,
+          fileName: payloadFileName,
+          savedAt: payload.savedAt,
+          savedBy: payload.savedBy?.nombre || 'Usuario',
+          data: payload
+        };
+
+        if (overwriteIndex >= 0) {
+          nextLib[overwriteIndex] = persisted;
+        } else {
+          nextLib.unshift(persisted);
+        }
+
+        currentSeriLibraryId = persisted.id;
+        currentSeriFileName = persisted.fileName;
+        localStorage.setItem(seriFilesKey, JSON.stringify(nextLib.slice(0, 50)));
+        return persisted;
+      } catch (_error) {
+        estadoEl.className = 'status status-warn';
+        estadoEl.textContent = 'No se pudo guardar en memoria local el archivo .seri.';
+        return null;
+      }
+    }
+
+    function applyDesignFromPayload(payload) {
+      if (!payload || !payload.diseno) {
+        throw new Error('Archivo .seri invalido');
+      }
+
+      const data = payload.diseno;
+      nombreDisenoInput.value = data.nombreDiseno || '';
+      ubicacionInput.value = data.ubicacion || '';
+      comentarioRapidoInput.value = data.comentarioRapido || '';
+      comentariosInput.value = data.comentarios || '';
+      renderVersionOptions();
+
+      secuenciaBody.innerHTML = '';
+      if (Array.isArray(data.secuencia) && data.secuencia.length > 0) {
+        data.secuencia.forEach((row) => addRow(row));
+      } else {
+        addRow();
+      }
+      ensureTrailingEmptyRow();
+      refreshIndexes();
+
+      if (data.imageData) {
+        previewImagen.src = data.imageData;
+        previewImagen.hidden = false;
+        dropHint.hidden = true;
+      } else {
+        previewImagen.hidden = true;
+        previewImagen.src = '';
+        dropHint.hidden = false;
+      }
+
+      saveDraft();
+    }
+
+    function createSeriFile(payload) {
+      const fileName = payload?.seriMeta?.fileName || `${safeFileName(payload.diseno?.nombreDiseno)}.seri`;
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/x-seri+json' });
+      return { fileName, blob };
+    }
+
+    async function saveSeriToDisk(payload, forcePick = false) {
+      const { fileName, blob } = createSeriFile(payload);
+
+      if (!forcePick && currentSeriHandle) {
+        try {
+          const writable = await currentSeriHandle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+          return fileName;
+        } catch (_error) {
+          currentSeriHandle = null;
+        }
+      }
+
+      if (window.showSaveFilePicker) {
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: fileName,
+            types: [
+              {
+                description: 'Archivo Seri',
+                accept: { 'application/x-seri+json': ['.seri'] }
+              }
+            ]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+          currentSeriHandle = handle;
+          currentSeriFileName = handle.name || fileName;
+          return currentSeriFileName;
+        } catch (_error) {
+          // Si el usuario cancela, no romper flujo
+        }
+      }
+
+      downloadBlob(blob, fileName);
+      currentSeriFileName = fileName;
+      return fileName;
+    }
+
+    async function shareSeri(payload) {
+      const { fileName, blob } = createSeriFile(payload);
+
+      if (navigator.share && window.File) {
+        try {
+          const file = new File([blob], fileName, { type: blob.type });
+          if (!navigator.canShare || navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: payload.diseno?.nombreDiseno || 'Diseno serigrafia',
+              text: 'Archivo .seri de SerigrafiApp',
+              files: [file]
+            });
+            return true;
+          }
+        } catch (_error) {
+          // Fallback a descarga
+        }
+      }
+
+      downloadBlob(blob, fileName);
+      return false;
+    }
+
+    function buildPdfDocument(payload) {
+      if (!window.jspdf || !window.jspdf.jsPDF) {
+        throw new Error('No se pudo cargar el generador PDF');
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+      const diseno = payload.diseno || {};
+      const seq = Array.isArray(diseno.secuencia) ? diseno.secuencia : [];
+      let y = 52;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.text('Orden de Produccion - Serigrafia', 40, y);
+      y += 24;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      doc.text(`Diseno: ${diseno.nombreDiseno || '-'}`, 40, y);
+      y += 16;
+      doc.text(`Ubicacion: ${diseno.ubicacion || '-'}`, 40, y);
+      y += 16;
+      doc.text(`Referencia: ${diseno.comentarioRapido || '-'}`, 40, y);
+      y += 16;
+      doc.text(`Usuario: ${payload.savedBy?.nombre || '-'}`, 40, y);
+      y += 16;
+      doc.text(`Fecha: ${new Date(payload.savedAt).toLocaleString()}`, 40, y);
+      y += 24;
+
+      doc.setFont('helvetica', 'bold');
+      doc.text('Secuencia', 40, y);
+      y += 14;
+
+      doc.setFont('helvetica', 'normal');
+      if (seq.length === 0) {
+        doc.text('Sin filas de secuencia.', 40, y);
+      } else {
+        seq.slice(0, 30).forEach((row, index) => {
+          const line = `${index + 1}. ${row.color || '-'} | Sq: ${row.squeegee || '-'} | Malla: ${row.malla || '-'} | Pelicula: ${row.pelicula || '-'}`;
+          doc.text(line, 40, y);
+          y += 14;
+          if (y > 780) {
+            doc.addPage();
+            y = 52;
+          }
+        });
+      }
+
+      y += 20;
+      doc.setFont('helvetica', 'bold');
+      doc.text('Comentarios', 40, y);
+      y += 14;
+      doc.setFont('helvetica', 'normal');
+      const comments = doc.splitTextToSize(diseno.comentarios || '-', 500);
+      doc.text(comments, 40, y);
+
+      return doc;
+    }
+
+    async function sharePdf(payload) {
+      const pdfName = `${safeFileName(payload.diseno?.nombreDiseno)}.pdf`;
+      const doc = buildPdfDocument(payload);
+      const blob = doc.output('blob');
+
+      if (navigator.share && window.File) {
+        try {
+          const file = new File([blob], pdfName, { type: 'application/pdf' });
+          if (!navigator.canShare || navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: payload.diseno?.nombreDiseno || 'Diseno serigrafia',
+              text: 'PDF generado por SerigrafiApp',
+              files: [file]
+            });
+            return true;
+          }
+        } catch (_error) {
+          // Fallback a descarga
+        }
+      }
+
+      downloadBlob(blob, pdfName);
+      return false;
+    }
+
+    function applyRolePermissions() {
+      const usersLink = document.querySelector('a[href="/users"]');
+      const rolesLink = document.querySelector('a[href="/roles"]');
+
+      if (!isAdmin) {
+        if (usersLink) usersLink.style.display = 'none';
+        if (rolesLink) rolesLink.style.display = 'none';
+      }
+
+      if (!canEdit) {
+        [
+          nombreDisenoInput,
+          ubicacionInput,
+          comentarioRapidoInput,
+          comentariosInput,
+          imagenInput,
+          guardarBtn,
+          guardarSeriBtn,
+          limpiarBtn
+        ].forEach((el) => {
+          if (el) {
+            el.disabled = true;
+          }
+        });
+
+        estadoEl.className = 'status status-warn';
+        estadoEl.textContent = 'Modo solo lectura: OP puede abrir, leer y compartir archivos .seri/PDF.';
+      }
+    }
+
+    function saveDraft() {
+      const draft = {
+        nombreDiseno: nombreDisenoInput.value,
+        ubicacion: ubicacionInput.value,
+        comentarioRapido: comentarioRapidoInput.value,
+        comentarios: comentariosInput.value,
+        secuencia: serializeRows(),
+        imageData: previewImagen.hidden ? '' : previewImagen.src
+      };
+      try {
+        localStorage.setItem(draftKey, JSON.stringify(draft));
+      } catch (_error) {
+        estadoEl.className = 'status status-warn';
+        estadoEl.textContent = 'No se pudo guardar el borrador (archivo muy grande para almacenamiento local).';
+      }
+    }
+
+    function loadSnapshot(snapshot) {
+      if (!snapshot) {
+        return;
+      }
+
+      ubicacionInput.value = snapshot.ubicacion || '';
+      comentarioRapidoInput.value = snapshot.comentarioRapido || '';
+      comentariosInput.value = snapshot.comentarios || '';
+
+      secuenciaBody.innerHTML = '';
+      if (snapshot.secuencia && snapshot.secuencia.length > 0) {
+        snapshot.secuencia.forEach((row) => addRow(row));
+      } else {
+        addRow();
+      }
+      ensureTrailingEmptyRow();
+      refreshIndexes();
+
+      if (snapshot.imageData) {
+        previewImagen.src = snapshot.imageData;
+        previewImagen.hidden = false;
+        dropHint.hidden = true;
+      } else {
+        previewImagen.hidden = true;
+        previewImagen.src = '';
+        dropHint.hidden = false;
+      }
+
+      saveDraft();
+    }
+
+    function saveCurrentAsVersion() {
+      const designName = nombreDisenoInput.value.trim();
+      if (!designName) {
+        return null;
+      }
+
+      const key = normalizeDesignName(designName);
+      const map = loadVersionsMap();
+      const versions = Array.isArray(map[key]) ? map[key] : [];
+      const versionId = `v${versions.length + 1}`;
+
+      versions.push({
+        id: versionId,
+        modifiedBy: getCurrentUserLabel(),
+        modifiedAt: new Date().toISOString(),
+        snapshot: {
+          ubicacion: ubicacionInput.value,
+          comentarioRapido: comentarioRapidoInput.value,
+          comentarios: comentariosInput.value,
+          secuencia: serializeRows(),
+          imageData: previewImagen.hidden ? '' : previewImagen.src
+        }
+      });
+
+      map[key] = versions;
+      saveVersionsMap(map);
+      activeVersionId = versionId;
+      renderVersionOptions();
+      setVersionChip(versionId);
+      return versionId;
+    }
+
+    function loadDraft() {
+      const rawDraft = localStorage.getItem(draftKey);
+      if (!rawDraft) {
+        addRow();
+        refreshIndexes();
+        applyRolePermissions();
+        return;
+      }
+
+      let draft;
+      try {
+        draft = JSON.parse(rawDraft);
+      } catch (_error) {
+        localStorage.removeItem(draftKey);
+        addRow();
+        refreshIndexes();
+        applyRolePermissions();
+        return;
+      }
+      nombreDisenoInput.value = draft.nombreDiseno || '';
+      ubicacionInput.value = draft.ubicacion || '';
+      comentarioRapidoInput.value = draft.comentarioRapido || '';
+      comentariosInput.value = draft.comentarios || '';
+      renderVersionOptions();
+
+      secuenciaBody.innerHTML = '';
+      if (draft.secuencia && draft.secuencia.length > 0) {
+        draft.secuencia.forEach((row) => addRow(row));
+      } else {
+        addRow();
+      }
+
+      ensureTrailingEmptyRow();
+      refreshIndexes();
+
+      if (draft.imageData) {
+        previewImagen.src = draft.imageData;
+        previewImagen.hidden = false;
+        dropHint.hidden = true;
+      }
+
+      estadoEl.className = 'status status-ok';
+      estadoEl.textContent = 'Borrador cargado correctamente.';
+      applyRolePermissions();
+    }
+
+    function clearForm() {
+      nombreDisenoInput.value = '';
+      ubicacionInput.value = '';
+      comentarioRapidoInput.value = '';
+      comentariosInput.value = '';
+      secuenciaBody.innerHTML = '';
+      addRow();
+      refreshIndexes();
+      previewImagen.hidden = true;
+      previewImagen.src = '';
+      dropHint.hidden = false;
+      activeVersionId = '';
+      renderVersionOptions();
+      setVersionChip('v1');
+      localStorage.removeItem(draftKey);
+      estadoEl.className = 'status status-warn';
+      estadoEl.textContent = 'Formulario limpio. Inicia un nuevo diseno.';
+    }
+
+    loadDraft();
+    setVersionChip('v1');
+
+    secuenciaBody.addEventListener('click', (event) => {
+      if (!canEdit) {
+        return;
+      }
+
+      const target = event.target;
+      if (target.classList.contains('color-preview')) {
+        const row = target.closest('tr');
+        if (!row) {
+          return;
+        }
+        const manualInput = row.querySelector('.color-manual');
+        if (manualInput) {
+          manualInput.click();
+        }
+        return;
+      }
+
+      if (!target.classList.contains('quitar')) {
+        return;
+      }
+      const row = target.closest('tr');
+      row.remove();
+      if (secuenciaBody.children.length === 0) {
+        addRow();
+      }
+      refreshIndexes();
+      saveDraft();
+    });
+
+    function handleSequenceEdit(event) {
+      if (!canEdit) {
+        return;
+      }
+
+      const row = event.target.closest('tr');
+      if (!row) {
+        return;
+      }
+
+      if (event.target.classList.contains('color')) {
+        const colorInput = event.target;
+        const colorPreview = row.querySelector('.color-preview');
+        const manualInput = row.querySelector('.color-manual');
+        const pantoneCode = colorInput.value.trim();
+        applyPreviewState(colorPreview, manualInput, pantoneCode);
+      }
+
+      if (event.target.classList.contains('color-manual')) {
+        const colorInput = row.querySelector('.color');
+        const colorPreview = row.querySelector('.color-preview');
+        const manualInput = row.querySelector('.color-manual');
+        const manualHex = event.target.value;
+        applyPreviewState(colorPreview, manualInput, manualHex);
+        colorInput.value = manualHex;
+      }
+
+      if (event.target.classList.contains('squeegee')) {
+        const wrap = row.querySelector('.squeegee-wrap');
+        if (wrap) wrap.style.background = getSqueegeeBackground(event.target.value);
+      }
+
+      const rows = [...secuenciaBody.querySelectorAll('tr')];
+      const lastRow = rows[rows.length - 1];
+
+      if (row === lastRow && rowHasData(lastRow)) {
+        addRow();
+      }
+
+      saveDraft();
+    }
+
+    secuenciaBody.addEventListener('input', handleSequenceEdit);
+    secuenciaBody.addEventListener('change', handleSequenceEdit);
+
+    secuenciaBody.addEventListener('dragstart', (event) => {
+      if (!canEdit) {
+        return;
+      }
+
+      const row = event.target.closest('tr');
+      if (!row) {
+        return;
+      }
+
+      draggedRow = row;
+      row.classList.add('dragging');
+
+      if (event.dataTransfer) {
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', 'row');
+      }
+    });
+
+    secuenciaBody.addEventListener('dragover', (event) => {
+      if (!canEdit) {
+        return;
+      }
+
+      event.preventDefault();
+      if (!draggedRow) {
+        return;
+      }
+
+      const targetRow = event.target.closest('tr');
+      if (!targetRow || targetRow === draggedRow) {
+        return;
+      }
+
+      const rect = targetRow.getBoundingClientRect();
+      const shouldInsertAfter = event.clientY - rect.top > rect.height / 2;
+      secuenciaBody.insertBefore(draggedRow, shouldInsertAfter ? targetRow.nextSibling : targetRow);
+      refreshIndexes();
+    });
+
+    secuenciaBody.addEventListener('dragend', () => {
+      if (!canEdit) {
+        return;
+      }
+
+      if (draggedRow) {
+        draggedRow.classList.remove('dragging');
+      }
+      draggedRow = null;
+      refreshIndexes();
+      saveDraft();
+    });
+
+    nombreDisenoInput.addEventListener('input', () => {
+      if (!canEdit) {
+        return;
+      }
+
+      activeVersionId = '';
+      renderVersionOptions();
+      setVersionChip('v1');
+      saveDraft();
+    });
+
+    nombreDisenoInput.addEventListener('change', () => {
+      if (!canEdit) {
+        return;
+      }
+
+      activeVersionId = '';
+      renderVersionOptions();
+      setVersionChip('v1');
+      saveDraft();
+    });
+
+    versionSelect.addEventListener('change', () => {
+      const selectedId = versionSelect.value;
+      if (!selectedId) {
+        activeVersionId = '';
+        setVersionChip('v1');
+        return;
+      }
+
+      const version = getVersionsForCurrentName().find((item) => item.id === selectedId);
+      if (!version) {
+        return;
+      }
+
+      activeVersionId = version.id;
+      setVersionChip(version.id);
+      loadSnapshot(version.snapshot);
+      estadoEl.className = 'status status-ok';
+      estadoEl.textContent = `${version.id} cargada (${version.modifiedBy}).`;
+    });
+
+    [ubicacionInput, comentarioRapidoInput, comentariosInput].forEach((el) => {
+      el.addEventListener('input', saveDraft);
+      el.addEventListener('change', saveDraft);
+    });
+
+    imagenInput.addEventListener('change', (event) => {
+      if (!canEdit) {
+        return;
+      }
+
+      const file = event.target.files && event.target.files[0];
+      if (!file) {
+        return;
+      }
+
+      if (!file.type.startsWith('image/')) {
+        estadoEl.className = 'status status-warn';
+        estadoEl.textContent = 'El archivo seleccionado no es una imagen valida.';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onerror = () => {
+        estadoEl.className = 'status status-warn';
+        estadoEl.textContent = 'No se pudo leer el archivo seleccionado.';
+      };
+
+      reader.onload = () => {
+        previewImagen.src = reader.result;
+        previewImagen.hidden = false;
+        dropHint.hidden = true;
+        saveDraft();
+        estadoEl.className = 'status status-ok';
+        estadoEl.textContent = 'Imagen cargada correctamente.';
+      };
+
+      reader.readAsDataURL(file);
+    });
+
+    guardarBtn.addEventListener('click', async () => {
+      if (!canEdit) {
+        return;
+      }
+
+      saveDraft();
+      const versionId = saveCurrentAsVersion();
+      const payload = buildSeriPayload();
+      const persisted = saveSeriToLocalLibrary(payload);
+      if (persisted) {
+        payload.seriMeta = payload.seriMeta || {};
+        payload.seriMeta.libraryId = persisted.id;
+        payload.seriMeta.fileName = persisted.fileName;
+      }
+      const fileName = await saveSeriToDisk(payload);
+      estadoEl.className = 'status status-ok';
+      if (versionId) {
+        estadoEl.textContent = `Guardado como ${versionId} y reescrito en ${fileName}.`;
+      } else {
+        estadoEl.textContent = `Archivo reescrito en ${fileName}. Escribe un nombre para crear versiones.`;
+      }
+    });
+
+    guardarSeriBtn.addEventListener('click', async () => {
+      if (!canEdit) {
+        return;
+      }
+
+      const payload = buildSeriPayload();
+      const persisted = saveSeriToLocalLibrary(payload);
+      if (persisted) {
+        payload.seriMeta = payload.seriMeta || {};
+        payload.seriMeta.libraryId = persisted.id;
+        payload.seriMeta.fileName = persisted.fileName;
+      }
+      const fileName = await saveSeriToDisk(payload);
+      estadoEl.className = 'status status-ok';
+      estadoEl.textContent = `Archivo ${fileName} guardado y reescrito.`;
+    });
+
+    abrirSeriBtn.addEventListener('click', () => {
+      seriFileInput.value = '';
+      seriFileInput.click();
+    });
+
+    seriFileInput.addEventListener('change', (event) => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) {
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onerror = () => {
+        estadoEl.className = 'status status-warn';
+        estadoEl.textContent = 'No se pudo leer el archivo .seri';
+      };
+      reader.onload = () => {
+        try {
+          const payload = JSON.parse(reader.result);
+          if (payload.format !== 'seri-v1') {
+            throw new Error('formato no compatible');
+          }
+
+          currentSeriFileName = file.name || payload?.seriMeta?.fileName || '';
+          currentSeriLibraryId = payload?.seriMeta?.libraryId || '';
+          currentSeriHandle = null;
+          applyDesignFromPayload(payload);
+          estadoEl.className = 'status status-ok';
+          estadoEl.textContent = `Archivo .seri cargado correctamente (${currentSeriFileName || 'sin nombre'}).`;
+        } catch (_error) {
+          estadoEl.className = 'status status-warn';
+          estadoEl.textContent = 'Archivo .seri invalido o incompatible.';
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    compartirSeriBtn.addEventListener('click', async () => {
+      const payload = buildSeriPayload();
+      const shared = await shareSeri(payload);
+      estadoEl.className = 'status status-ok';
+      estadoEl.textContent = shared
+        ? 'Archivo .seri compartido correctamente.'
+        : 'Tu navegador no soporta compartir archivos; se descargo el .seri.';
+    });
+
+    compartirPdfBtn.addEventListener('click', async () => {
+      try {
+        const payload = buildSeriPayload();
+        const shared = await sharePdf(payload);
+        estadoEl.className = 'status status-ok';
+        estadoEl.textContent = shared
+          ? 'PDF compartido correctamente.'
+          : 'Tu navegador no soporta compartir archivos; se descargo el PDF.';
+      } catch (_error) {
+        estadoEl.className = 'status status-warn';
+        estadoEl.textContent = 'No se pudo generar el PDF en este navegador.';
+      }
+    });
+
+    limpiarBtn.addEventListener('click', clearForm);
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('serigrafia_user');
+      window.location.href = '/login';
+    });
+  </script>
+</body>
+</html>
+
+
+

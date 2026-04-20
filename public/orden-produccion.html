@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1f6a5a" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+  <title>Reporte De Produccion | SerigrafiaApp</title>
+  <style>
+    :root {
+      --line: #2b2b2b;
+      --header: #d4d4d4;
+      --paper: #ffffff;
+      --bg: #eceff2;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 18px;
+      background: var(--bg);
+      font-family: Arial, Helvetica, sans-serif;
+      color: #111;
+    }
+
+    .wrap {
+      width: min(1580px, 100%);
+      margin: 0 auto;
+    }
+
+    .sheet {
+      width: 100%;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      overflow-x: auto;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    table {
+      width: 100%;
+      min-width: 1450px;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    td,
+    th {
+      border: 1px solid var(--line);
+      height: 26px;
+      padding: 3px 6px;
+      font-size: 0.72rem;
+      vertical-align: middle;
+      font-weight: 400;
+    }
+
+    .section {
+      background: var(--header);
+      text-align: center;
+      font-weight: 700;
+      text-transform: lowercase;
+      font-size: 0.82rem;
+      height: 26px;
+    }
+
+    .label {
+      background: #f5f5f5;
+      text-transform: lowercase;
+      text-align: center;
+      width: 120px;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .data {
+      background: #fff;
+      outline: none;
+    }
+
+    .data:focus {
+      background: #fff8d9;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .btn {
+      border: 1px solid #233044;
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-weight: 700;
+      color: white;
+      background: #1f6a5a;
+      cursor: pointer;
+    }
+
+    .btn.alt {
+      background: #2f4f8a;
+    }
+
+    .btn.soft {
+      background: #6d7586;
+    }
+
+    .foot {
+      margin-top: 10px;
+      font-size: 0.76rem;
+      color: #666;
+    }
+
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .actions,
+      .foot {
+        display: none;
+      }
+
+      .sheet {
+        box-shadow: none;
+        border: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="sheet">
+      <table id="reportTable">
+        <colgroup>
+          <col style="width: 120px;" />
+          <col style="width: 120px;" />
+          <col style="width: 120px;" />
+          <col style="width: 120px;" />
+          <col style="width: 120px;" />
+          <col style="width: 120px;" />
+          <col style="width: 120px;" />
+          <col style="width: 120px;" />
+          <col style="width: 120px;" />
+          <col style="width: 120px;" />
+          <col style="width: 120px;" />
+          <col style="width: 120px;" />
+          <col style="width: 120px;" />
+        </colgroup>
+        <tbody>
+          <tr>
+            <td colspan="9"></td>
+            <td class="section center" colspan="1">fecha</td>
+            <td class="data center" id="mFecha" colspan="3"></td>
+          </tr>
+          <tr>
+            <td class="label">cliente</td>
+            <td class="data" id="mCliente" contenteditable="true" spellcheck="false" colspan="4"></td>
+            <td class="label center"># PO</td>
+            <td class="data" id="mPo" contenteditable="true" spellcheck="false" colspan="7"></td>
+          </tr>
+          <tr>
+            <td class="label">maquina #</td>
+            <td class="data" id="mMaquina" contenteditable="true" spellcheck="false" colspan="4"></td>
+            <td class="label center">job #</td>
+            <td class="data" id="mJob" contenteditable="true" spellcheck="false" colspan="7"></td>
+          </tr>
+          <tr>
+            <td colspan="13"></td>
+          </tr>
+          <tr>
+            <td class="label">operador</td>
+            <td class="data" id="mOperador" colspan="4"></td>
+            <td class="label center">sacador</td>
+            <td class="data" id="mSecador" contenteditable="true" spellcheck="false" colspan="7"></td>
+          </tr>
+          <tr>
+            <td class="label">metedor</td>
+            <td class="data" id="mMetedor" contenteditable="true" spellcheck="false" colspan="4"></td>
+            <td class="label center">cachador</td>
+            <td class="data" id="mCachador" contenteditable="true" spellcheck="false" colspan="7"></td>
+          </tr>
+          <tr>
+            <td class="section" colspan="13">detalles de orden</td>
+          </tr>
+          <tr>
+            <td class="label">tecnica</td>
+            <td class="data" id="mTecnica" contenteditable="true" spellcheck="false" colspan="12"></td>
+          </tr>
+          <tr>
+            <td class="label">frente</td>
+            <td class="data" id="mFrente" contenteditable="true" spellcheck="false"></td>
+            <td class="label"># de tintas</td>
+            <td class="data" id="mTintas" contenteditable="true" spellcheck="false" colspan="5"></td>
+            <td class="label">placement</td>
+            <td class="data" id="mPlacement" contenteditable="true" spellcheck="false" colspan="4"></td>
+          </tr>
+          <tr>
+            <td class="label">espalda</td>
+            <td class="data" id="mEspalda" contenteditable="true" spellcheck="false"></td>
+            <td colspan="11"></td>
+          </tr>
+          <tr>
+            <td class="label">manga</td>
+            <td class="data" id="mManga" contenteditable="true" spellcheck="false"></td>
+            <td class="label">estilo de arte</td>
+            <td class="data" id="mEstiloArte" contenteditable="true" spellcheck="false" colspan="5"></td>
+            <td class="label">medida de arte</td>
+            <td class="data" id="mMedidaArte" contenteditable="true" spellcheck="false" colspan="4"></td>
+          </tr>
+          <tr>
+            <td class="label">cuello</td>
+            <td class="data" id="mCuello" contenteditable="true" spellcheck="false"></td>
+            <td colspan="11"></td>
+          </tr>
+          <tr>
+            <td colspan="13"></td>
+          </tr>
+          <tr>
+            <td class="section" colspan="13">cantidades</td>
+          </tr>
+          <tr>
+            <td class="label center">talla</td>
+            <td class="section center">xxs</td>
+            <td class="section center">xs</td>
+            <td class="section center">s</td>
+            <td class="section center">m</td>
+            <td class="section center">l</td>
+            <td class="section center">xl</td>
+            <td class="section center">2x</td>
+            <td class="section center">3x</td>
+            <td class="section center">4x</td>
+            <td class="section center">5x</td>
+            <td class="section center">6x</td>
+            <td class="section center">total</td>
+          </tr>
+          <tr>
+            <td class="label">buenas</td>
+            <td class="data center" id="q_xxs" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="q_xs" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="q_s" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="q_m" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="q_l" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="q_xl" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="q_2x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="q_3x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="q_4x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="q_5x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="q_6x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="q_total" contenteditable="true" spellcheck="false"></td>
+          </tr>
+          <tr>
+            <td colspan="13"></td>
+          </tr>
+          <tr>
+            <td class="label">danadas</td>
+            <td colspan="12"></td>
+          </tr>
+          <tr>
+            <td class="label">print</td>
+            <td class="data center" id="d_print_xxs" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_print_xs" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_print_s" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_print_m" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_print_l" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_print_xl" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_print_2x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_print_3x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_print_4x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_print_5x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_print_6x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_print_total" contenteditable="true" spellcheck="false"></td>
+          </tr>
+          <tr>
+            <td class="label">fabric</td>
+            <td class="data center" id="d_fabric_xxs" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_fabric_xs" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_fabric_s" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_fabric_m" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_fabric_l" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_fabric_xl" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_fabric_2x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_fabric_3x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_fabric_4x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_fabric_5x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_fabric_6x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_fabric_total" contenteditable="true" spellcheck="false"></td>
+          </tr>
+          <tr>
+            <td class="label">dye</td>
+            <td class="data center" id="d_dye_xxs" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_dye_xs" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_dye_s" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_dye_m" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_dye_l" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_dye_xl" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_dye_2x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_dye_3x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_dye_4x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_dye_5x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_dye_6x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_dye_total" contenteditable="true" spellcheck="false"></td>
+          </tr>
+          <tr>
+            <td class="label">total</td>
+            <td class="data center" id="d_total_xxs" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_total_xs" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_total_s" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_total_m" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_total_l" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_total_xl" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_total_2x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_total_3x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_total_4x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_total_5x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_total_6x" contenteditable="true" spellcheck="false"></td>
+            <td class="data center" id="d_total_total" contenteditable="true" spellcheck="false"></td>
+          </tr>
+          <tr>
+            <td colspan="13"></td>
+          </tr>
+          <tr>
+            <td class="section" colspan="13">comentarios</td>
+          </tr>
+          <tr><td class="data" id="mComentarios1" contenteditable="true" spellcheck="false" colspan="13"></td></tr>
+          <tr><td class="data" id="mComentarios2" contenteditable="true" spellcheck="false" colspan="13"></td></tr>
+          <tr><td class="data" id="mComentarios3" contenteditable="true" spellcheck="false" colspan="13"></td></tr>
+          <tr><td class="data" id="mComentarios4" contenteditable="true" spellcheck="false" colspan="13"></td></tr>
+          <tr><td class="data" id="mComentarios5" contenteditable="true" spellcheck="false" colspan="13"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="actions">
+      <button id="printBtn" class="btn" type="button">Imprimir / PDF</button>
+      <button id="saveExcelBtn" class="btn alt" type="button">Guardar Excel</button>
+      <button id="shareExcelBtn" class="btn alt" type="button">Compartir Excel</button>
+      <button id="closeBtn" class="btn soft" type="button">Cerrar</button>
+    </div>
+
+    <div class="foot">Este archivo se exporta como .xlsx para abrir en Excel o importar en Google Sheets.</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="/pwa-register.js"></script>
+  <script>
+    const draftKey = 'serigrafia_diseno_draft';
+    const userRaw = localStorage.getItem('serigrafia_user');
+    const user = userRaw ? JSON.parse(userRaw) : null;
+
+    function fmt(value) {
+      return value && String(value).trim() ? String(value) : '';
+    }
+
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.textContent = fmt(value);
+      }
+    }
+
+    function splitComments(value) {
+      const text = String(value || '').split(/\r?\n/);
+      for (let i = 0; i < 5; i += 1) {
+        setText(`mComentarios${i + 1}`, text[i] || '');
+      }
+    }
+
+    function fillAutoFields() {
+      setText('mFecha', new Date().toLocaleDateString('es-MX'));
+      setText('mOperador', user ? user.nombre : '');
+    }
+
+    function loadFromDraft() {
+      fillAutoFields();
+      const raw = localStorage.getItem(draftKey);
+      if (!raw) {
+        return;
+      }
+
+      let draft;
+      try {
+        draft = JSON.parse(raw);
+      } catch (_error) {
+        return;
+      }
+
+      setText('mDiseno', draft.nombreDiseno);
+      setText('mPlacement', draft.ubicacion);
+      splitComments(draft.comentarios);
+
+      const qty = draft.cantidades || {};
+      const map = {
+        q_xxs: qty.xxs,
+        q_xs: qty.xs,
+        q_s: qty.s,
+        q_m: qty.m,
+        q_l: qty.l,
+        q_xl: qty.xl,
+        q_2x: qty['2x'] || qty['2xl'],
+        q_3x: qty['3x'] || qty['3xl'],
+        q_4x: qty['4x'] || qty['4xl'],
+        q_5x: qty['5x'] || qty['5xl'],
+        q_6x: qty['6x'],
+        q_total: qty.total
+      };
+
+      Object.entries(map).forEach(([id, value]) => {
+        if (value !== undefined && value !== null) {
+          setText(id, value);
+        }
+      });
+    }
+
+    function buildWorkbook() {
+      const table = document.getElementById('reportTable');
+      const workbook = XLSX.utils.table_to_book(table, { sheet: 'Reporte' });
+      return workbook;
+    }
+
+    function safeFileName() {
+      const rawName = document.getElementById('mDiseno').textContent || 'reporte-produccion';
+      const normalized = rawName.toLowerCase().replace(/[^a-z0-9-_]+/g, '-').replace(/^-+|-+$/g, '');
+      return `${normalized || 'reporte-produccion'}.xlsx`;
+    }
+
+    function workbookToBlob(workbook) {
+      const array = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      return new Blob([array], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    }
+
+    function downloadExcel() {
+      const workbook = buildWorkbook();
+      XLSX.writeFile(workbook, safeFileName());
+    }
+
+    async function shareExcel() {
+      const workbook = buildWorkbook();
+      const blob = workbookToBlob(workbook);
+      const fileName = safeFileName();
+
+      if (navigator.share && window.File) {
+        try {
+          const file = new File([blob], fileName, { type: blob.type });
+          if (!navigator.canShare || navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: 'Reporte de produccion',
+              text: 'Archivo Excel exportado desde SerigrafiApp',
+              files: [file]
+            });
+            return;
+          }
+        } catch (_error) {
+          // Fallback a descarga
+        }
+      }
+
+      XLSX.writeFile(workbook, fileName);
+    }
+
+    document.getElementById('printBtn').addEventListener('click', () => window.print());
+    document.getElementById('saveExcelBtn').addEventListener('click', downloadExcel);
+    document.getElementById('shareExcelBtn').addEventListener('click', shareExcel);
+    document.getElementById('closeBtn').addEventListener('click', () => window.close());
+
+    loadFromDraft();
+  </script>
+</body>
+</html>

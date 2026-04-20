@@ -1,0 +1,34 @@
+{
+  "name": "serigrafia-pwa",
+  "version": "1.0.0",
+  "description": "Aplicación PWA para gestión de serigrafía con usuarios y roles.",
+  "main": "src/app.ts",
+  "scripts": {
+    "start": "node dist/app.js",
+    "build": "tsc",
+    "dev": "ts-node src/app.ts",
+    "test": "jest"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "pinia": "^3.0.4",
+    "typescript": "^4.5.4",
+    "vue": "^3.5.32",
+    "vue-router": "^5.0.4"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/jest": "^27.0.2",
+    "@types/node": "^16.11.7",
+    "jest": "^27.0.6",
+    "ts-node": "^10.4.0"
+  },
+  "keywords": [
+    "PWA",
+    "serigrafia",
+    "usuarios",
+    "roles"
+  ],
+  "author": "Tu Nombre",
+  "license": "MIT"
+}
