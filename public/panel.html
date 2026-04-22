@@ -669,8 +669,6 @@
         </div>
 
         <div class="links">
-          <a class="link" href="/users" target="_blank" rel="noreferrer">Ver usuarios (JSON)</a>
-          <a class="link" href="/roles" target="_blank" rel="noreferrer">Ver roles (JSON)</a>
           <a class="link" href="/orden-produccion.html" target="_blank" rel="noreferrer">Abrir formato de produccion</a>
         </div>
 
@@ -1498,14 +1496,6 @@
     }
 
     function applyRolePermissions() {
-      const usersLink = document.querySelector('a[href="/users"]');
-      const rolesLink = document.querySelector('a[href="/roles"]');
-
-      if (!isAdmin) {
-        if (usersLink) usersLink.style.display = 'none';
-        if (rolesLink) rolesLink.style.display = 'none';
-      }
-
       if (!canEdit) {
         [
           nombreDisenoInput,
