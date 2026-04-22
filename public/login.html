@@ -46,6 +46,19 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     }
 
+    .brand {
+      margin-bottom: 14px;
+      display: grid;
+      place-items: center;
+    }
+
+    .brand img {
+      width: min(300px, 100%);
+      height: auto;
+      display: block;
+      object-fit: contain;
+    }
+
     h1 {
       margin: 0 0 6px;
       font-size: 1.65rem;
@@ -140,6 +153,9 @@
 </head>
 <body>
   <main class="card">
+    <div class="brand">
+      <img src="/logo-serigrafiapp.jpg" alt="Logo SerigrafiApp" />
+    </div>
     <h1>SerigrafiaApp</h1>
     <p class="sub">Inicia sesion para entrar al panel de serigrafia.</p>
 

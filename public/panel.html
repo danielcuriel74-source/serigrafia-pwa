@@ -609,7 +609,7 @@
           <button id="abrirSeriBtn" type="button" class="btn btn-outline">Abrir .seri</button>
           <button id="compartirSeriBtn" type="button" class="btn btn-secondary">Compartir .seri</button>
           <button id="compartirPdfBtn" type="button" class="btn btn-outline">Compartir PDF</button>
-          <button id="limpiarBtn" type="button" class="btn btn-soft">Limpiar formulario</button>
+          <button id="newBtn" type="button" class="btn btn-soft">New</button>
         </div>
         <input id="seriFileInput" type="file" accept=".seri,application/json" hidden />
       </div>
@@ -667,7 +667,7 @@
     const abrirSeriBtn = document.getElementById('abrirSeriBtn');
     const compartirSeriBtn = document.getElementById('compartirSeriBtn');
     const compartirPdfBtn = document.getElementById('compartirPdfBtn');
-    const limpiarBtn = document.getElementById('limpiarBtn');
+    const newBtn = document.getElementById('newBtn');
     const seriFileInput = document.getElementById('seriFileInput');
 
     let pantoneMap = {};
@@ -1392,7 +1392,7 @@
           imagenInput,
           guardarBtn,
           guardarSeriBtn,
-          limpiarBtn
+          newBtn
         ].forEach((el) => {
           if (el) {
             el.disabled = true;
@@ -1530,7 +1530,7 @@
       applyRolePermissions();
     }
 
-    function clearForm() {
+    function startNewDesign() {
       nombreDisenoInput.value = '';
       ubicacionInput.value = '';
       comentarioRapidoInput.value = '';
@@ -1542,11 +1542,59 @@
       previewImagen.src = '';
       dropHint.hidden = false;
       activeVersionId = '';
+      currentSeriFileName = '';
+      currentSeriLibraryId = '';
+      currentSeriHandle = null;
       renderVersionOptions();
       setVersionChip('v1');
       localStorage.removeItem(draftKey);
       estadoEl.className = 'status status-warn';
-      estadoEl.textContent = 'Formulario limpio. Inicia un nuevo diseno.';
+      estadoEl.textContent = 'Nuevo diseno listo. Completa los campos para comenzar.';
+    }
+
+    function normalizeSeriPayload(rawPayload) {
+      if (!rawPayload || typeof rawPayload !== 'object') {
+        throw new Error('Archivo .seri vacio o invalido');
+      }
+
+      if (rawPayload.format === 'seri-v1' && rawPayload.diseno && typeof rawPayload.diseno === 'object') {
+        return rawPayload;
+      }
+
+      if (rawPayload.diseno && typeof rawPayload.diseno === 'object') {
+        return {
+          ...rawPayload,
+          format: 'seri-v1'
+        };
+      }
+
+      const looksLikeLegacy = (
+        'nombreDiseno' in rawPayload
+        || 'ubicacion' in rawPayload
+        || 'comentarioRapido' in rawPayload
+        || 'comentarios' in rawPayload
+        || 'secuencia' in rawPayload
+      );
+
+      if (looksLikeLegacy) {
+        return {
+          format: 'seri-v1',
+          app: 'SerigrafiApp',
+          savedAt: rawPayload.savedAt || new Date().toISOString(),
+          seriMeta: rawPayload.seriMeta || {},
+          savedBy: rawPayload.savedBy || {},
+          diseno: {
+            nombreDiseno: rawPayload.nombreDiseno || '',
+            ubicacion: rawPayload.ubicacion || '',
+            comentarioRapido: rawPayload.comentarioRapido || '',
+            comentarios: rawPayload.comentarios || '',
+            secuencia: Array.isArray(rawPayload.secuencia) ? rawPayload.secuencia : [],
+            imageData: rawPayload.imageData || ''
+          }
+        };
+      }
+
+      throw new Error('Archivo .seri incompatible');
     }
 
     loadDraft();
@@ -1819,10 +1867,9 @@
       };
       reader.onload = () => {
         try {
-          const payload = JSON.parse(reader.result);
-          if (payload.format !== 'seri-v1') {
-            throw new Error('formato no compatible');
-          }
+          const text = String(reader.result || '').replace(/^\uFEFF/, '');
+          const parsed = JSON.parse(text);
+          const payload = normalizeSeriPayload(parsed);
 
           currentSeriFileName = file.name || payload?.seriMeta?.fileName || '';
           currentSeriLibraryId = payload?.seriMeta?.libraryId || '';
@@ -1861,7 +1908,7 @@
       }
     });
 
-    limpiarBtn.addEventListener('click', clearForm);
+    newBtn.addEventListener('click', startNewDesign);
 
     document.getElementById('logoutBtn').addEventListener('click', () => {
       localStorage.removeItem('serigrafia_user');

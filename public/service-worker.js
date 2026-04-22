@@ -1,4 +1,4 @@
-const CACHE_NAME = 'serigrafia-cache-v3';
+const CACHE_NAME = 'serigrafia-cache-v4';
 const APP_SHELL = [
     '/',
     '/login.html',
@@ -50,8 +50,10 @@ self.addEventListener('fetch', (event) => {
         event.respondWith(
             fetch(request)
                 .then((response) => {
-                    const responseClone = response.clone();
-                    caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
+                    if (response && response.ok) {
+                        const responseClone = response.clone();
+                        caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
+                    }
                     return response;
                 })
                 .catch(() => caches.match(request).then((cached) => cached || caches.match('/login.html')))
@@ -66,8 +68,10 @@ self.addEventListener('fetch', (event) => {
             }
 
             return fetch(request).then((response) => {
-                const responseClone = response.clone();
-                caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
+                if (response && response.ok) {
+                    const responseClone = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
+                }
                 return response;
             });
         })
