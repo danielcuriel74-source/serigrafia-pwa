@@ -82,11 +82,15 @@
       inset: 0;
       display: grid;
       place-items: center;
-      color: white;
-      font-weight: 800;
-      font-size: 0.9rem;
-      background: linear-gradient(140deg, var(--accent), var(--accent-2));
-      letter-spacing: 0.04em;
+      background: white;
+      padding: 2px;
+    }
+
+    .logo-fallback img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
     }
 
     .search {
@@ -528,7 +532,9 @@
     <header class="topbar">
       <div class="logo" title="SerigrafiApp">
         <img id="appLogo" src="/logo-serigrafiapp.jpg" alt="Logo SerigrafiApp" />
-        <div id="logoFallback" class="logo-fallback">SG</div>
+        <div id="logoFallback" class="logo-fallback">
+          <img src="/logo-serigrafiapp.jpg" alt="Logo SerigrafiApp" />
+        </div>
       </div>
       <label class="search" for="buscarDiseno">
         <span>🔎</span>
