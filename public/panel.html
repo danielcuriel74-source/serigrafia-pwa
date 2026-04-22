@@ -405,6 +405,45 @@
       margin: 0;
     }
 
+    .seri-panel {
+      display: grid;
+      gap: 10px;
+    }
+
+    .recent-seri-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 8px;
+    }
+
+    .recent-seri-item {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: white;
+      padding: 9px 10px;
+      cursor: pointer;
+    }
+
+    .recent-seri-item:hover {
+      background: #eef5ff;
+    }
+
+    .recent-seri-name {
+      display: block;
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .recent-seri-meta {
+      display: block;
+      margin-top: 3px;
+      font-size: 0.76rem;
+      color: var(--muted);
+    }
+
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -538,7 +577,7 @@
       </div>
       <label class="search" for="buscarDiseno">
         <span>🔎</span>
-        <input id="buscarDiseno" type="text" placeholder="Buscar diseno..." />
+        <input id="buscarDiseno" type="text" placeholder="Buscar o tocar para ver recientes..." />
         <ul id="searchResults" class="search-results" hidden></ul>
       </label>
       <div class="top-actions">
@@ -611,8 +650,8 @@
 
         <div class="btn-row">
           <button id="guardarBtn" type="button" class="btn btn-primary">Guardar diseno</button>
-          <button id="guardarSeriBtn" type="button" class="btn btn-secondary">Guardar .seri</button>
-          <button id="abrirSeriBtn" type="button" class="btn btn-outline">Abrir .seri</button>
+          <button id="guardarSeriBtn" type="button" class="btn btn-secondary">Guardar en Archivos</button>
+          <button id="abrirSeriBtn" type="button" class="btn btn-outline">Importar .seri</button>
           <button id="compartirSeriBtn" type="button" class="btn btn-secondary">Compartir .seri</button>
           <button id="compartirPdfBtn" type="button" class="btn btn-outline">Compartir PDF</button>
           <button id="newBtn" type="button" class="btn btn-soft">New</button>
@@ -634,6 +673,16 @@
           <a class="link" href="/roles" target="_blank" rel="noreferrer">Ver roles (JSON)</a>
           <a class="link" href="/orden-produccion.html" target="_blank" rel="noreferrer">Abrir formato de produccion</a>
         </div>
+
+        <section class="section seri-panel">
+          <p class="title">Archivos .seri</p>
+          <p class="small">En iPhone usa Guardar en Archivos y elige tu carpeta Serigrafia en Archivos o iCloud Drive.</p>
+          <div class="btn-row" style="margin-top: 0;">
+            <button id="abrirSeriSideBtn" type="button" class="btn btn-outline">Importar desde Archivos</button>
+            <button id="verRecientesBtn" type="button" class="btn btn-soft">Ver recientes</button>
+          </div>
+          <ul id="recentSeriList" class="recent-seri-list"></ul>
+        </section>
 
         <p class="small">Tip: los datos se guardan en el navegador mientras trabajas.</p>
       </aside>
@@ -674,6 +723,9 @@
     const compartirSeriBtn = document.getElementById('compartirSeriBtn');
     const compartirPdfBtn = document.getElementById('compartirPdfBtn');
     const newBtn = document.getElementById('newBtn');
+    const abrirSeriSideBtn = document.getElementById('abrirSeriSideBtn');
+    const verRecientesBtn = document.getElementById('verRecientesBtn');
+    const recentSeriList = document.getElementById('recentSeriList');
     const seriFileInput = document.getElementById('seriFileInput');
 
     let pantoneMap = {};
@@ -711,6 +763,14 @@
       renderSearchResults(buscarDisenoInput.value);
     });
 
+    buscarDisenoInput.addEventListener('focus', () => {
+      renderSearchResults(buscarDisenoInput.value);
+    });
+
+    buscarDisenoInput.addEventListener('click', () => {
+      renderSearchResults(buscarDisenoInput.value);
+    });
+
     buscarDisenoInput.addEventListener('keydown', (event) => {
       if (event.key !== 'Enter') {
         return;
@@ -727,6 +787,15 @@
       if (!event.target.closest('.search')) {
         hideSearchResults();
       }
+    });
+
+    abrirSeriSideBtn.addEventListener('click', () => {
+      abrirSeriBtn.click();
+    });
+
+    verRecientesBtn.addEventListener('click', () => {
+      buscarDisenoInput.focus();
+      renderSearchResults('');
     });
 
     function getPantoneHex(pantoneCode) {
@@ -869,6 +938,53 @@
       }
     }
 
+    function formatSavedAt(value) {
+      if (!value) {
+        return 'sin fecha';
+      }
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) {
+        return 'sin fecha';
+      }
+      return date.toLocaleString('es-MX', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function getRecentSeriItems(limit = 8) {
+      return getSeriLibrary()
+        .slice()
+        .sort((a, b) => new Date(b?.savedAt || 0).getTime() - new Date(a?.savedAt || 0).getTime())
+        .slice(0, limit);
+    }
+
+    function renderRecentSeriList() {
+      const items = getRecentSeriItems();
+      recentSeriList.innerHTML = '';
+
+      if (items.length === 0) {
+        const empty = document.createElement('li');
+        empty.className = 'recent-seri-item';
+        empty.innerHTML = '<span class="recent-seri-name">Todavia no hay archivos .seri en la biblioteca local</span><span class="recent-seri-meta">Importa uno desde Archivos o guarda uno nuevo.</span>';
+        recentSeriList.appendChild(empty);
+        return;
+      }
+
+      items.forEach((item) => {
+        const li = document.createElement('li');
+        li.className = 'recent-seri-item';
+        const name = item?.data?.diseno?.nombreDiseno || '(sin nombre)';
+        const fileName = item?.fileName || 'archivo.seri';
+        li.innerHTML = `<span class="recent-seri-name">${name}</span><span class="recent-seri-meta">${fileName} · ${formatSavedAt(item?.savedAt)}</span>`;
+        li.addEventListener('click', () => openSeriLibraryItem(item));
+        recentSeriList.appendChild(li);
+      });
+    }
+
     function hideSearchResults() {
       searchResultsEl.hidden = true;
       searchResultsEl.innerHTML = '';
@@ -884,40 +1000,40 @@
       currentSeriHandle = null;
       applyDesignFromPayload(item.data);
       hideSearchResults();
+      renderRecentSeriList();
       estadoEl.className = 'status status-ok';
       estadoEl.textContent = `Archivo ${currentSeriFileName || 'seri'} cargado desde memoria local.`;
     }
 
     function renderSearchResults(query) {
       const needle = String(query || '').trim().toLowerCase();
-      const library = getSeriLibrary();
-
-      if (!needle) {
-        hideSearchResults();
-        return [];
-      }
-
-      const matched = library.filter((item) => {
+      const library = needle
+        ? getSeriLibrary().filter((item) => {
         const name = String(item?.data?.diseno?.nombreDiseno || '').toLowerCase();
         const fileName = String(item?.fileName || '').toLowerCase();
         const by = String(item?.savedBy || '').toLowerCase();
         const comment = String(item?.data?.diseno?.comentarioRapido || '').toLowerCase();
         return name.includes(needle) || fileName.includes(needle) || by.includes(needle) || comment.includes(needle);
-      }).slice(0, 8);
+        })
+        : getRecentSeriItems();
+
+      const matched = library.slice(0, 8);
 
       searchResultsEl.innerHTML = '';
       matched.forEach((item) => {
         const li = document.createElement('li');
         const name = item?.data?.diseno?.nombreDiseno || '(sin nombre)';
         const fileName = item?.fileName || 'archivo.seri';
-        li.textContent = `${name} - ${fileName}`;
+        li.textContent = needle
+          ? `${name} - ${fileName}`
+          : `${name} - ${fileName} · ${formatSavedAt(item?.savedAt)}`;
         li.addEventListener('click', () => openSeriLibraryItem(item));
         searchResultsEl.appendChild(li);
       });
 
       if (matched.length === 0) {
         const empty = document.createElement('li');
-        empty.textContent = 'Sin resultados en memoria local';
+        empty.textContent = needle ? 'Sin resultados en memoria local' : 'Sin archivos recientes en memoria local';
         empty.style.cursor = 'default';
         searchResultsEl.appendChild(empty);
       }
@@ -1184,6 +1300,7 @@
         currentSeriLibraryId = persisted.id;
         currentSeriFileName = persisted.fileName;
         localStorage.setItem(seriFilesKey, JSON.stringify(nextLib.slice(0, 50)));
+        renderRecentSeriList();
         return persisted;
       } catch (_error) {
         estadoEl.className = 'status status-warn';
@@ -1495,6 +1612,7 @@
       if (!rawDraft) {
         addRow();
         refreshIndexes();
+        renderRecentSeriList();
         applyRolePermissions();
         return;
       }
@@ -1506,6 +1624,7 @@
         localStorage.removeItem(draftKey);
         addRow();
         refreshIndexes();
+        renderRecentSeriList();
         applyRolePermissions();
         return;
       }
@@ -1533,6 +1652,7 @@
 
       estadoEl.className = 'status status-ok';
       estadoEl.textContent = 'Borrador cargado correctamente.';
+      renderRecentSeriList();
       applyRolePermissions();
     }
 
@@ -1604,6 +1724,7 @@
     }
 
     loadDraft();
+  renderRecentSeriList();
     setVersionChip('v1');
 
     secuenciaBody.addEventListener('click', (event) => {
@@ -1852,7 +1973,7 @@
       }
       const fileName = await saveSeriToDisk(payload);
       estadoEl.className = 'status status-ok';
-      estadoEl.textContent = `Archivo ${fileName} guardado y reescrito.`;
+      estadoEl.textContent = `Archivo ${fileName} guardado en Archivos y actualizado en la biblioteca local.`;
     });
 
     abrirSeriBtn.addEventListener('click', () => {
@@ -1880,9 +2001,16 @@
           currentSeriFileName = file.name || payload?.seriMeta?.fileName || '';
           currentSeriLibraryId = payload?.seriMeta?.libraryId || '';
           currentSeriHandle = null;
+          payload.seriMeta = payload.seriMeta || {};
+          payload.seriMeta.fileName = currentSeriFileName || payload.seriMeta.fileName || '';
+          const persisted = saveSeriToLocalLibrary(payload);
+          if (persisted) {
+            payload.seriMeta.libraryId = persisted.id;
+            currentSeriLibraryId = persisted.id;
+          }
           applyDesignFromPayload(payload);
           estadoEl.className = 'status status-ok';
-          estadoEl.textContent = `Archivo .seri cargado correctamente (${currentSeriFileName || 'sin nombre'}).`;
+          estadoEl.textContent = `Archivo .seri cargado correctamente (${currentSeriFileName || 'sin nombre'}) y agregado a recientes.`;
         } catch (_error) {
           estadoEl.className = 'status status-warn';
           estadoEl.textContent = 'Archivo .seri invalido o incompatible.';
