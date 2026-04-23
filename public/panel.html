@@ -769,13 +769,13 @@
       renderSearchResults(buscarDisenoInput.value);
     });
 
-    buscarDisenoInput.addEventListener('keydown', (event) => {
+    buscarDisenoInput.addEventListener('keydown', async (event) => {
       if (event.key !== 'Enter') {
         return;
       }
 
       event.preventDefault();
-      const matched = renderSearchResults(buscarDisenoInput.value);
+      const matched = await renderSearchResults(buscarDisenoInput.value);
       if (matched.length > 0) {
         openSeriLibraryItem(matched[0]);
       }
@@ -926,11 +926,61 @@
       }
     }
 
-    function getSeriLibrary() {
+    let seriDB = null;
+
+    function openSeriDB() {
+      return new Promise((resolve, reject) => {
+        if (seriDB) { resolve(seriDB); return; }
+        const req = indexedDB.open('serigrafia_db', 1);
+        req.onupgradeneeded = (event) => {
+          const db = event.target.result;
+          if (!db.objectStoreNames.contains('seri_files')) {
+            const store = db.createObjectStore('seri_files', { keyPath: 'id' });
+            store.createIndex('savedAt', 'savedAt', { unique: false });
+          }
+        };
+        req.onsuccess = (event) => {
+          seriDB = event.target.result;
+          resolve(seriDB);
+        };
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function migrateSeriLibraryToIndexedDB() {
       try {
         const rawLib = localStorage.getItem(seriFilesKey);
-        const list = rawLib ? JSON.parse(rawLib) : [];
-        return Array.isArray(list) ? list : [];
+        if (!rawLib) return;
+        const lib = JSON.parse(rawLib);
+        if (!Array.isArray(lib) || lib.length === 0) {
+          localStorage.removeItem(seriFilesKey);
+          return;
+        }
+        const db = await openSeriDB();
+        const tx = db.transaction('seri_files', 'readwrite');
+        const store = tx.objectStore('seri_files');
+        for (const item of lib) {
+          store.put(item);
+        }
+        await new Promise((resolve, reject) => {
+          tx.oncomplete = resolve;
+          tx.onerror = () => reject(tx.error);
+        });
+        localStorage.removeItem(seriFilesKey);
+      } catch (_e) {
+        // migracion fallida, datos permanecen en localStorage
+      }
+    }
+
+    async function getSeriLibrary() {
+      try {
+        const db = await openSeriDB();
+        return new Promise((resolve) => {
+          const tx = db.transaction('seri_files', 'readonly');
+          const req = tx.objectStore('seri_files').getAll();
+          req.onsuccess = () => resolve(Array.isArray(req.result) ? req.result : []);
+          req.onerror = () => resolve([]);
+        });
       } catch (_error) {
         return [];
       }
@@ -953,15 +1003,16 @@
       });
     }
 
-    function getRecentSeriItems(limit = 8) {
-      return getSeriLibrary()
+    async function getRecentSeriItems(limit = 8) {
+      const all = await getSeriLibrary();
+      return all
         .slice()
         .sort((a, b) => new Date(b?.savedAt || 0).getTime() - new Date(a?.savedAt || 0).getTime())
         .slice(0, limit);
     }
 
-    function renderRecentSeriList() {
-      const items = getRecentSeriItems();
+    async function renderRecentSeriList() {
+      const items = await getRecentSeriItems();
       recentSeriList.innerHTML = '';
 
       if (items.length === 0) {
@@ -988,7 +1039,7 @@
       searchResultsEl.innerHTML = '';
     }
 
-    function openSeriLibraryItem(item) {
+    async function openSeriLibraryItem(item) {
       if (!item || !item.data) {
         return;
       }
@@ -998,22 +1049,26 @@
       currentSeriHandle = null;
       applyDesignFromPayload(item.data);
       hideSearchResults();
-      renderRecentSeriList();
+      await renderRecentSeriList();
       estadoEl.className = 'status status-ok';
       estadoEl.textContent = `Archivo ${currentSeriFileName || 'seri'} cargado desde memoria local.`;
     }
 
-    function renderSearchResults(query) {
+    async function renderSearchResults(query) {
       const needle = String(query || '').trim().toLowerCase();
-      const library = needle
-        ? getSeriLibrary().filter((item) => {
-        const name = String(item?.data?.diseno?.nombreDiseno || '').toLowerCase();
-        const fileName = String(item?.fileName || '').toLowerCase();
-        const by = String(item?.savedBy || '').toLowerCase();
-        const comment = String(item?.data?.diseno?.comentarioRapido || '').toLowerCase();
-        return name.includes(needle) || fileName.includes(needle) || by.includes(needle) || comment.includes(needle);
-        })
-        : getRecentSeriItems();
+      let library;
+      if (needle) {
+        const all = await getSeriLibrary();
+        library = all.filter((item) => {
+          const name = String(item?.data?.diseno?.nombreDiseno || '').toLowerCase();
+          const fileName = String(item?.fileName || '').toLowerCase();
+          const by = String(item?.savedBy || '').toLowerCase();
+          const comment = String(item?.data?.diseno?.comentarioRapido || '').toLowerCase();
+          return name.includes(needle) || fileName.includes(needle) || by.includes(needle) || comment.includes(needle);
+        });
+      } else {
+        library = await getRecentSeriItems();
+      }
 
       const matched = library.slice(0, 8);
 
@@ -1273,32 +1328,31 @@
       URL.revokeObjectURL(url);
     }
 
-    function saveSeriToLocalLibrary(payload) {
+    async function saveSeriToLocalLibrary(payload) {
       try {
-        const rawLib = localStorage.getItem(seriFilesKey);
-        const lib = rawLib ? JSON.parse(rawLib) : [];
-        const nextLib = Array.isArray(lib) ? lib : [];
+        const db = await openSeriDB();
+        const all = await getSeriLibrary();
 
         const payloadFileName = payload?.seriMeta?.fileName || `${safeFileName(payload.diseno?.nombreDiseno || 'diseno')}.seri`;
-        const overwriteIndex = nextLib.findIndex((item) => item.id === currentSeriLibraryId || item.fileName === payloadFileName);
+        const overwriteIndex = all.findIndex((item) => item.id === currentSeriLibraryId || item.fileName === payloadFileName);
         const persisted = {
-          id: overwriteIndex >= 0 ? nextLib[overwriteIndex].id : `${safeFileName(payload.diseno?.nombreDiseno || 'diseno')}-${Date.now()}`,
+          id: overwriteIndex >= 0 ? all[overwriteIndex].id : `${safeFileName(payload.diseno?.nombreDiseno || 'diseno')}-${Date.now()}`,
           fileName: payloadFileName,
           savedAt: payload.savedAt,
           savedBy: payload.savedBy?.nombre || 'Usuario',
           data: payload
         };
 
-        if (overwriteIndex >= 0) {
-          nextLib[overwriteIndex] = persisted;
-        } else {
-          nextLib.unshift(persisted);
-        }
+        const tx = db.transaction('seri_files', 'readwrite');
+        tx.objectStore('seri_files').put(persisted);
+        await new Promise((resolve, reject) => {
+          tx.oncomplete = resolve;
+          tx.onerror = () => reject(tx.error);
+        });
 
         currentSeriLibraryId = persisted.id;
         currentSeriFileName = persisted.fileName;
-        localStorage.setItem(seriFilesKey, JSON.stringify(nextLib.slice(0, 50)));
-        renderRecentSeriList();
+        await renderRecentSeriList();
         return persisted;
       } catch (_error) {
         estadoEl.className = 'status status-warn';
@@ -1597,12 +1651,12 @@
       return versionId;
     }
 
-    function loadDraft() {
+    async function loadDraft() {
       const rawDraft = localStorage.getItem(draftKey);
       if (!rawDraft) {
         addRow();
         refreshIndexes();
-        renderRecentSeriList();
+        await renderRecentSeriList();
         applyRolePermissions();
         return;
       }
@@ -1614,7 +1668,7 @@
         localStorage.removeItem(draftKey);
         addRow();
         refreshIndexes();
-        renderRecentSeriList();
+        await renderRecentSeriList();
         applyRolePermissions();
         return;
       }
@@ -1642,7 +1696,7 @@
 
       estadoEl.className = 'status status-ok';
       estadoEl.textContent = 'Borrador cargado correctamente.';
-      renderRecentSeriList();
+      await renderRecentSeriList();
       applyRolePermissions();
     }
 
@@ -1713,9 +1767,11 @@
       throw new Error('Archivo .seri incompatible');
     }
 
-    loadDraft();
-  renderRecentSeriList();
     setVersionChip('v1');
+    (async () => {
+      await migrateSeriLibraryToIndexedDB();
+      await loadDraft();
+    })();
 
     secuenciaBody.addEventListener('click', (event) => {
       if (!canEdit) {
@@ -1934,7 +1990,7 @@
       saveDraft();
       const versionId = saveCurrentAsVersion();
       const payload = buildSeriPayload();
-      const persisted = saveSeriToLocalLibrary(payload);
+      const persisted = await saveSeriToLocalLibrary(payload);
       if (persisted) {
         payload.seriMeta = payload.seriMeta || {};
         payload.seriMeta.libraryId = persisted.id;
@@ -1955,7 +2011,7 @@
       }
 
       const payload = buildSeriPayload();
-      const persisted = saveSeriToLocalLibrary(payload);
+      const persisted = await saveSeriToLocalLibrary(payload);
       if (persisted) {
         payload.seriMeta = payload.seriMeta || {};
         payload.seriMeta.libraryId = persisted.id;
@@ -1982,7 +2038,7 @@
         estadoEl.className = 'status status-warn';
         estadoEl.textContent = 'No se pudo leer el archivo .seri';
       };
-      reader.onload = () => {
+      reader.onload = async () => {
         try {
           const text = String(reader.result || '').replace(/^\uFEFF/, '');
           const parsed = JSON.parse(text);
@@ -1993,7 +2049,7 @@
           currentSeriHandle = null;
           payload.seriMeta = payload.seriMeta || {};
           payload.seriMeta.fileName = currentSeriFileName || payload.seriMeta.fileName || '';
-          const persisted = saveSeriToLocalLibrary(payload);
+          const persisted = await saveSeriToLocalLibrary(payload);
           if (persisted) {
             payload.seriMeta.libraryId = persisted.id;
             currentSeriLibraryId = persisted.id;
