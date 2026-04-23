@@ -161,114 +161,94 @@
 
     <form id="loginForm">
       <label for="email">Correo</label>
-      <input id="email" type="email" required placeholder="admin@serigrafia.local" />
+      <input id="email" type="email" required placeholder="usuario@ejemplo.com" />
 
       <label for="password">Contrasena</label>
       <input id="password" type="password" required placeholder="********" />
 
       <button type="submit">Entrar</button>
-      <div class="quick-grid">
-        <button id="quickLoginAdminBtn" class="btn-test btn-admin" type="button">Entrar como Administrador</button>
-        <button id="quickLoginEditorBtn" class="btn-test btn-editor" type="button">Entrar como Editor</button>
-        <button id="quickLoginOpBtn" class="btn-test btn-op" type="button">Entrar como OP (solo lectura)</button>
-      </div>
     </form>
 
     <div id="msg" class="msg"></div>
-
-    <p class="hint">
-      Admin: <code>admin@serigrafia.local</code> / <code>admin123</code><br />
-      Editor: <code>editor@serigrafia.local</code> / <code>editor123</code><br />
-      OP: <code>op@serigrafia.local</code> / <code>op123</code>
-    </p>
   </main>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAsNlGwwhMbuTgYVJjFc0_ry23Mf9GkmbY",
+      authDomain: "serigrafiapp-72a1c.firebaseapp.com",
+      projectId: "serigrafiapp-72a1c",
+      storageBucket: "serigrafiapp-72a1c.firebasestorage.app",
+      messagingSenderId: "543239645171",
+      appId: "1:543239645171:web:f3283714ee7c3063e41486"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Si ya hay sesion activa redirigir al panel
+    auth.onAuthStateChanged((firebaseUser) => {
+      if (firebaseUser) {
+        window.location.href = '/panel.html';
+      }
+    });
+
     const form = document.getElementById('loginForm');
     const msg = document.getElementById('msg');
-    const quickLoginAdminBtn = document.getElementById('quickLoginAdminBtn');
-    const quickLoginEditorBtn = document.getElementById('quickLoginEditorBtn');
-    const quickLoginOpBtn = document.getElementById('quickLoginOpBtn');
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       msg.className = 'msg';
       msg.textContent = 'Validando...';
 
-      const email = document.getElementById('email').value;
+      const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
 
       try {
-        const response = await fetch('/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
+        const cred = await auth.signInWithEmailAndPassword(email, password);
+        const uid = cred.user.uid;
 
-        const data = await response.json();
-
-        if (!response.ok) {
-          msg.classList.add('err');
-          msg.textContent = data.error || 'No se pudo iniciar sesion';
-          return;
+        let userData;
+        try {
+          const docSnap = await db.collection('usuarios').doc(uid).get();
+          if (docSnap.exists) {
+            const data = docSnap.data();
+            userData = {
+              id: uid,
+              nombre: data.nombre || cred.user.displayName || email.split('@')[0],
+              email: cred.user.email,
+              roles: Array.isArray(data.roles) ? data.roles : ['op']
+            };
+          } else {
+            userData = {
+              id: uid,
+              nombre: cred.user.displayName || email.split('@')[0],
+              email: cred.user.email,
+              roles: ['op']
+            };
+          }
+        } catch (_e) {
+          userData = {
+            id: uid,
+            nombre: cred.user.displayName || email.split('@')[0],
+            email: cred.user.email,
+            roles: ['op']
+          };
         }
 
-        localStorage.setItem('serigrafia_user', JSON.stringify(data.user));
+        localStorage.setItem('serigrafia_user', JSON.stringify(userData));
         msg.classList.add('ok');
-        msg.textContent = 'Bienvenido ' + data.user.nombre + '. Redirigiendo...';
+        msg.textContent = 'Bienvenido ' + userData.nombre + '. Redirigiendo...';
         setTimeout(() => {
           window.location.href = '/panel.html';
         }, 500);
       } catch (_error) {
         msg.classList.add('err');
-        msg.textContent = 'Error de red. Intenta de nuevo.';
+        msg.textContent = 'Correo o contrasena incorrectos.';
       }
-    });
-
-    function quickLogin(userPrueba, label) {
-      localStorage.setItem('serigrafia_user', JSON.stringify(userPrueba));
-      msg.className = 'msg ok';
-      msg.textContent = `Acceso rapido como ${label}. Redirigiendo...`;
-
-      setTimeout(() => {
-        window.location.href = '/panel.html';
-      }, 300);
-    }
-
-    quickLoginAdminBtn.addEventListener('click', () => {
-      quickLogin(
-        {
-          id: 'u_admin',
-          nombre: 'Administrador',
-          email: 'admin@serigrafia.local',
-          roles: ['admin']
-        },
-        'Administrador'
-      );
-    });
-
-    quickLoginEditorBtn.addEventListener('click', () => {
-      quickLogin(
-        {
-          id: 'u_editor',
-          nombre: 'Editor',
-          email: 'editor@serigrafia.local',
-          roles: ['editor']
-        },
-        'Editor'
-      );
-    });
-
-    quickLoginOpBtn.addEventListener('click', () => {
-      quickLogin(
-        {
-          id: 'u_op',
-          nombre: 'Operador Lectura',
-          email: 'op@serigrafia.local',
-          roles: ['op']
-        },
-        'OP (solo lectura)'
-      );
     });
   </script>
   <script src="/pwa-register.js"></script>

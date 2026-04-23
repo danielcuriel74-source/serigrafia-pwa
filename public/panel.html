@@ -687,12 +687,37 @@
     </section>
   </main>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="/pwa-register.js"></script>
   <script>
     const draftKey = 'serigrafia_diseno_draft';
     const versionsKey = 'serigrafia_sequence_versions';
     const seriFilesKey = 'serigrafia_seri_files';
+
+    // Inicializar Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAsNlGwwhMbuTgYVJjFc0_ry23Mf9GkmbY",
+      authDomain: "serigrafiapp-72a1c.firebaseapp.com",
+      projectId: "serigrafiapp-72a1c",
+      storageBucket: "serigrafiapp-72a1c.firebasestorage.app",
+      messagingSenderId: "543239645171",
+      appId: "1:543239645171:web:f3283714ee7c3063e41486"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const fbAuth = firebase.auth();
+    const fbDb = firebase.firestore();
+
+    // Validar sesion Firebase al cargar
+    fbAuth.onAuthStateChanged(async (firebaseUser) => {
+      if (!firebaseUser) {
+        localStorage.removeItem('serigrafia_user');
+        window.location.href = '/login';
+      }
+    });
+
     const raw = localStorage.getItem('serigrafia_user');
 
     if (!raw) {
@@ -2090,7 +2115,12 @@
 
     newBtn.addEventListener('click', startNewDesign);
 
-    document.getElementById('logoutBtn').addEventListener('click', () => {
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      try {
+        await fbAuth.signOut();
+      } catch (_e) {
+        // ignorar error de signOut
+      }
       localStorage.removeItem('serigrafia_user');
       window.location.href = '/login';
     });
